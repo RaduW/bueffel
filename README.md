@@ -41,6 +41,18 @@ Every push to `main` builds and deploys the site automatically, using the workfl
 
 One-time setup: in the repository on GitHub, go to **Settings → Pages** and set **Source** to **GitHub Actions**.
 
+## Installing it as an app
+
+The app is a Progressive Web App (PWA). You can install it from the online version, and it then works offline:
+
+- **Chrome / Edge (desktop or Android):** click the install icon in the address bar, or use the menu → **Install app** (or **Add to Home screen**).
+- **Safari on iPhone / iPad:** tap **Share → Add to Home Screen**.
+- **Safari on Mac:** **File → Add to Dock**.
+
+Updates install automatically: when a new version is deployed, the app picks it up the next time you open it.
+
+The service worker only runs in production builds (`npm run build` / `npm run preview`, or the online version), not in `npm run dev`.
+
 ## How to use it
 
 1. Click the gear icon next to the title to open **Settings**, and choose:
@@ -86,7 +98,8 @@ Statistics and settings are saved in the browser's `localStorage` (key `declinat
 | `src/main.ts` | Declination tables, nouns, question logic, statistics |
 | `src/style.css` | Styling (light and dark mode) |
 | `public/favicon.svg` | Browser tab icon |
-| `vite.config.ts` | Vite config (relative `base`, so the build works on GitHub Pages) |
+| `public/*.png` | App icons for installing the PWA (Android, iOS, desktop) |
+| `vite.config.ts` | Vite config: relative `base` (so the build works on GitHub Pages) and the PWA manifest and service worker (via `vite-plugin-pwa`) |
 | `.github/workflows/deploy.yml` | Builds and deploys to GitHub Pages on every push to `main` |
 | `German Declination.md` | The grammar reference the exercises are based on |
 
