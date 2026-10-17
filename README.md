@@ -41,6 +41,12 @@ Every push to `main` builds and deploys the site automatically, using the workfl
 
 One-time setup: in the repository on GitHub, go to **Settings → Pages** and set **Source** to **GitHub Actions**.
 
+## Phone version
+
+There is a separate page for smartphones, `mobile.html` (online: <https://raduw.github.io/declination-practice/mobile.html>). It has large tap targets and keeps **Skip** / **Next** in a bar at the bottom of the screen, within thumb reach. It leaves out the per-exercise table, and **Reset statistics** is in the settings sheet instead.
+
+Phones opening `index.html` are sent to the phone version automatically (small touch screens only). Each version has a link to the other in its settings: **Phone version** or **Desktop version**. Once you pick one, that choice is remembered on that device. Both versions share the same settings and statistics.
+
 ## Installing it as an app
 
 The app is a Progressive Web App (PWA). You can install it from the online version, and it then works offline:
@@ -84,7 +90,7 @@ The header shows:
 - **accuracy:** the share of questions with no mistakes
 - **streak:** how many questions in a row you've solved without a mistake
 
-The table below breaks these numbers down by exercise.
+The table below breaks these numbers down by exercise (desktop version only).
 
 A question only counts once you click your first answer, so reloading the page doesn't change the numbers.
 
@@ -94,13 +100,17 @@ Statistics and settings are saved in the browser's `localStorage` (key `declinat
 
 | File | Purpose |
 |---|---|
-| `index.html` | Page layout (Vite entry point) |
-| `src/main.ts` | Declination tables, nouns, question logic, statistics |
-| `src/style.css` | Styling (light and dark mode) |
+| `index.html` | Desktop page (Vite entry point); sends phones to `mobile.html` |
+| `mobile.html` | Phone page (Vite entry point) |
+| `src/app.ts` | Shared logic: declination tables, nouns, questions, statistics |
+| `src/main.ts` | Desktop page entry: loads the styles and `app.ts` |
+| `src/mobile.ts` | Phone page entry: loads the styles, phone overrides and `app.ts` |
+| `src/style.css` | Shared styling (light and dark mode) |
+| `src/mobile.css` | Phone layout overrides |
 | `public/favicon.svg` | Browser tab icon |
 | `public/*.png` | App icons for installing the PWA (Android, iOS, desktop) |
-| `vite.config.ts` | Vite config: relative `base` (so the build works on GitHub Pages) and the PWA manifest and service worker (via `vite-plugin-pwa`) |
+| `vite.config.ts` | Vite config: relative `base` (so the build works on GitHub Pages), the two pages, and the PWA manifest and service worker (via `vite-plugin-pwa`) |
 | `.github/workflows/deploy.yml` | Builds and deploys to GitHub Pages on every push to `main` |
 | `German Declination.md` | The grammar reference the exercises are based on |
 
-To add nouns or adjectives, edit `NOUN_POOLS` or `ADJECTIVES` in `src/main.ts`. Each noun lists the forms offered as choices in `opts`, and that list must include every correct form of the noun.
+To add nouns or adjectives, edit `NOUN_POOLS` or `ADJECTIVES` in `src/app.ts`. Each noun lists the forms offered as choices in `opts`, and that list must include every correct form of the noun.

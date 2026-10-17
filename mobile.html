@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Deklination üben</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <meta name="theme-color" content="#2f5fd0">
+</head>
+<body class="mobile">
+  <header>
+    <div class="title">
+      <h1>Deklination üben</h1>
+      <button id="open-settings" class="icon-button" title="Settings" aria-label="Settings">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
+    </div>
+    <div class="stats">
+      <div><span id="stat-shown">0</span><small>shown</small></div>
+      <div><span id="stat-perfect">0</span><small>success</small></div>
+      <div><span id="stat-errors">0</span><small>errors</small></div>
+      <div><span id="stat-rate">–</span><small>accuracy</small></div>
+      <div><span id="stat-streak">0</span><small>streak</small></div>
+    </div>
+  </header>
+
+  <dialog id="settings" aria-labelledby="settings-title">
+    <h2 id="settings-title">Settings</h2>
+    <fieldset>
+      <legend>Exercises</legend>
+      <div id="exercise-list"></div>
+    </fieldset>
+    <fieldset>
+      <legend>Nouns</legend>
+      <div id="pool-list"></div>
+    </fieldset>
+    <fieldset>
+      <legend>Cases</legend>
+      <div id="case-list"></div>
+    </fieldset>
+    <p id="settings-error" class="error" hidden>Select at least one exercise, one noun group and one case.</p>
+    <div class="dialog-actions">
+      <button id="reset" class="danger">Reset statistics</button>
+      <button id="close-settings" class="primary">Done</button>
+    </div>
+    <p class="switch"><a id="switch-view" href="index.html" data-view="desktop">Desktop version</a></p>
+  </dialog>
+
+  <main>
+    <section id="card" class="card">
+      <div class="prompt">
+        <div class="case-badge" id="q-case"></div>
+        <div class="exercise-name" id="q-exercise"></div>
+        <div class="given">
+          <span class="noun" id="q-noun"></span>
+          <span class="gender" id="q-gender"></span>
+          <span class="adjective" id="q-adj"></span>
+        </div>
+      </div>
+
+      <div class="phrase" id="q-phrase"></div>
+
+      <div id="slots"></div>
+    </section>
+  </main>
+
+  <!-- Thumb-reach bar: Skip while answering, result + Next once solved -->
+  <nav class="bottom-bar">
+    <button id="skip">Skip</button>
+    <div class="result" id="result" hidden>
+      <span id="result-text"></span>
+      <button id="next" class="primary">Next</button>
+    </div>
+  </nav>
+  <script type="module" src="/src/mobile.ts"></script>
+</body>
+</html>

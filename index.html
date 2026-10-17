@@ -7,6 +7,15 @@
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <meta name="theme-color" content="#2f5fd0">
+  <script>
+    // Phones get the phone page, unless a version was picked explicitly
+    try {
+      const view = localStorage.getItem('declination-view');
+      if (view === 'mobile' || (view === null && matchMedia('(max-width: 640px) and (pointer: coarse)').matches)) {
+        location.replace('mobile.html');
+      }
+    } catch { /* storage unavailable: stay on this page */ }
+  </script>
 </head>
 <body>
   <main>
@@ -45,6 +54,7 @@
       </fieldset>
       <p id="settings-error" class="error" hidden>Select at least one exercise, one noun group and one case.</p>
       <div class="dialog-actions">
+        <a id="switch-view" href="mobile.html" data-view="mobile">Phone version</a>
         <button id="close-settings" class="primary">Done</button>
       </div>
     </dialog>

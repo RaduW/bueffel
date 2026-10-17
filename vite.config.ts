@@ -5,6 +5,12 @@ export default defineConfig({
   // Relative asset paths, so the build works under any sub-path
   // (e.g. GitHub Pages serves it from /declination-practice/)
   base: './',
+  build: {
+    // Two pages: desktop (index.html) and phone (mobile.html)
+    rollupOptions: {
+      input: { main: 'index.html', mobile: 'mobile.html' },
+    },
+  },
   plugins: [
     VitePWA({
       // New versions are picked up on the next visit without asking

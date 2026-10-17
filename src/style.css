@@ -106,7 +106,8 @@ fieldset { border: none; padding: 0; margin: 16px 0 0; }
 legend { color: var(--muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
 fieldset > div { display: flex; flex-direction: column; gap: 6px; }
 #case-list { flex-direction: row; flex-wrap: wrap; gap: 6px 16px; }
-.dialog-actions { display: flex; justify-content: flex-end; margin-top: 20px; }
+.dialog-actions { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 20px; }
+.dialog-actions a { color: var(--muted); font-size: 0.9rem; }
 fieldset label { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
 .error { color: var(--bad); margin: 8px 0 0; }
 
