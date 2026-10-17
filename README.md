@@ -69,9 +69,10 @@ The service worker only runs in production builds (`npm run build` / `npm run pr
      - der + adjective + noun (_dem alten Mann_)
      - ein / kein + adjective + noun (_einem alten Mann_)
    - **Nouns:** the core set (Mann, Kind, Frau, Leute), more nouns, or n-nouns (Junge, Student …)
+   - **Gender / number:** any mix of maskulin, neutrum, feminin and Plural (e.g. only maskulin + Plural)
    - **Cases:** Nominativ, Akkusativ, Dativ, Genitiv
 
-   Close the dialog with **Done**, Escape, or a click outside it. Changes are saved straight away. The dialog stays open until at least one exercise, one noun group and one case are selected.
+   Close the dialog with **Done**, Escape, or a click outside it. Changes are saved straight away. The dialog stays open, with a message saying what's missing, until the settings allow at least one question: at least one exercise, noun group, gender and case, and nouns of the chosen genders in the chosen groups.
 2. Each question shows a case, a noun with its gender (or *Plural*), and an adjective if the exercise uses one.
 3. Click the right form in each row of options:
    - **Green** means correct, and that row is locked.

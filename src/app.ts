@@ -33,7 +33,7 @@ interface Counts {
 }
 
 interface State {
-  settings: { exercises: string[]; pools: string[]; cases: string[] }
+  settings: { exercises: string[]; pools: string[]; genders: string[]; cases: string[] }
   stats: Counts & { streak: number; byExercise: Record<string, Counts> }
 }
 
@@ -59,6 +59,7 @@ const CASES = [
 ];
 
 const GENDER_LABEL: Record<Gender, string> = { m: 'maskulin', n: 'neutrum', f: 'feminin', p: 'Plural' };
+const GENDERS = Object.keys(GENDER_LABEL) as Gender[];
 
 const DEF_ARTICLE: Table = {
   m: ['der', 'den', 'dem', 'des'],
@@ -226,7 +227,7 @@ const STORE_KEY = 'declination-trainer-v1';
 
 function defaultState(): State {
   return {
-    settings: { exercises: ['def'], pools: ['core'], cases: CASES.map(c => c.id) },
+    settings: { exercises: ['def'], pools: ['core'], genders: [...GENDERS], cases: CASES.map(c => c.id) },
     stats: { shown: 0, perfect: 0, streak: 0, byExercise: {} },
   };
 }
@@ -234,7 +235,11 @@ function defaultState(): State {
 function loadState(): State {
   try {
     const saved = JSON.parse(localStorage.getItem(STORE_KEY) ?? 'null');
-    if (saved && saved.settings && saved.stats) return saved;
+    if (saved && saved.settings && saved.stats) {
+      // Settings saved before the gender filter existed: allow all genders
+      saved.settings.genders ??= [...GENDERS];
+      return saved;
+    }
   } catch { /* ignore corrupt or blocked storage */ }
   return defaultState();
 }
@@ -289,20 +294,46 @@ function renderSettings() {
   renderCheckboxes('pool-list', Object.entries(NOUN_POOLS).map(([id, p]) => ({ id, label: p.label })), s.pools, v => {
     s.pools = v; settingsChanged();
   });
+  renderCheckboxes('gender-list', GENDERS.map(g => ({ id: g, label: GENDER_LABEL[g] })), s.genders, v => {
+    s.genders = v; settingsChanged();
+  });
   renderCheckboxes('case-list', CASES.map(c => ({ id: c.id, label: c.name })), s.cases, v => {
     s.cases = v; settingsChanged();
   });
 }
 
-function settingsValid() {
+// Nouns from the selected groups that have one of the selected genders
+function availableNouns(): Noun[] {
   const s = state.settings;
-  return s.exercises.length > 0 && s.pools.length > 0 && s.cases.length > 0;
+  return s.pools.flatMap(p => NOUN_POOLS[p].nouns).filter(n => s.genders.includes(n.g));
+}
+
+// Why no question can be drawn with the current settings, or null if one can
+function settingsProblem(): string | null {
+  const s = state.settings;
+  if (!s.exercises.length) return 'Select at least one exercise.';
+  if (!s.pools.length) return 'Select at least one noun group.';
+  if (!s.genders.length) return 'Select at least one gender or Plural.';
+  if (!s.cases.length) return 'Select at least one case.';
+  if (!availableNouns().length) return 'The selected noun groups have no nouns of the selected genders (the n-nouns are all masculine).';
+  return null;
+}
+
+function settingsValid() {
+  return settingsProblem() === null;
+}
+
+function showSettingsProblem() {
+  const problem = settingsProblem();
+  const el = $('settings-error');
+  el.textContent = problem ?? '';
+  el.hidden = problem === null;
 }
 
 function settingsChanged() {
   saveState();
   renderSettings();
-  $('settings-error').hidden = settingsValid();
+  showSettingsProblem();
   // Keep a question the user has already started; otherwise draw a new one
   if (!current || !current.touched || current.finished) newQuestion();
 }
@@ -347,13 +378,13 @@ let current: Question | null = null;
 let lastKey = '';
 
 function newQuestion() {
+  showSettingsProblem();
   const valid = settingsValid();
-  $('settings-error').hidden = valid;
   $('card').hidden = !valid;
   if (!valid) { current = null; return; }
 
   const s = state.settings;
-  const nouns = s.pools.flatMap(p => NOUN_POOLS[p].nouns);
+  const nouns = availableNouns();
   let exercise: Exercise, noun: Noun, ci: CaseIndex, adj: string, key: string;
   let tries = 0;
   do {
