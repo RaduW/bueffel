@@ -33,6 +33,14 @@ The `dist/` folder is a plain static site that you can host anywhere.
 
 > Statistics are stored per origin, so the dev server (`localhost:5173`) and the preview server (`localhost:4173`) keep separate statistics.
 
+## Online version (GitHub Pages)
+
+The app is published at <https://raduw.github.io/declination-practice/>.
+
+Every push to `main` builds and deploys the site automatically, using the workflow in `.github/workflows/deploy.yml`. You can also run it by hand from the repository's **Actions** tab (**Deploy to GitHub Pages → Run workflow**).
+
+One-time setup: in the repository on GitHub, go to **Settings → Pages** and set **Source** to **GitHub Actions**.
+
 ## How to use it
 
 1. Click the gear icon next to the title to open **Settings**, and choose:
@@ -78,6 +86,8 @@ Statistics and settings are saved in the browser's `localStorage` (key `declinat
 | `src/main.ts` | Declination tables, nouns, question logic, statistics |
 | `src/style.css` | Styling (light and dark mode) |
 | `public/favicon.svg` | Browser tab icon |
+| `vite.config.ts` | Vite config (relative `base`, so the build works on GitHub Pages) |
+| `.github/workflows/deploy.yml` | Builds and deploys to GitHub Pages on every push to `main` |
 | `German Declination.md` | The grammar reference the exercises are based on |
 
 To add nouns or adjectives, edit `NOUN_POOLS` or `ADJECTIVES` in `src/main.ts`. Each noun lists the forms offered as choices in `opts`, and that list must include every correct form of the noun.
