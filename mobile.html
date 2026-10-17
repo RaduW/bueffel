@@ -7,6 +7,13 @@
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <meta name="theme-color" content="#2f5fd0">
+  <script>
+    // Apply the theme picked in the settings before the page is drawn
+    try {
+      const theme = localStorage.getItem('declination-theme');
+      if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+    } catch { /* storage unavailable: follow the system theme */ }
+  </script>
 </head>
 <body class="mobile">
   <header>
@@ -45,6 +52,14 @@
     <fieldset>
       <legend>Cases</legend>
       <div id="case-list"></div>
+    </fieldset>
+    <fieldset>
+      <legend>Appearance</legend>
+      <div class="segmented" id="theme-choice" role="radiogroup" aria-label="Theme">
+        <label><input type="radio" name="theme" value="system"> Device</label>
+        <label><input type="radio" name="theme" value="light"> Light</label>
+        <label><input type="radio" name="theme" value="dark"> Dark</label>
+      </div>
     </fieldset>
     <p id="settings-error" class="error" hidden></p>
     <div class="dialog-actions">

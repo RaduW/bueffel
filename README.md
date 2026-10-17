@@ -71,6 +71,7 @@ The service worker only runs in production builds (`npm run build` / `npm run pr
    - **Nouns:** the core set (Mann, Kind, Frau, Leute), more nouns, or n-nouns (Junge, Student …)
    - **Gender / number:** any mix of maskulin, neutrum, feminin and Plural (e.g. only maskulin + Plural)
    - **Cases:** Nominativ, Akkusativ, Dativ, Genitiv
+   - **Appearance:** **Device** (default) follows your device's light/dark setting; **Light** or **Dark** overrides it.
 
    Close the dialog with **Done**, Escape, or a click outside it. Changes are saved straight away. The dialog stays open, with a message saying what's missing, until the settings allow at least one question: at least one exercise, noun group, gender and case, and nouns of the chosen genders in the chosen groups.
 2. Each question shows a case, a noun with its gender (or *Plural*), and an adjective if the exercise uses one.
@@ -95,7 +96,11 @@ The table below breaks these numbers down by exercise (desktop version only).
 
 A question only counts once you click your first answer, so reloading the page doesn't change the numbers.
 
-Statistics and settings are saved in the browser's `localStorage` (key `declination-trainer-v1`), so they persist between visits. **Reset statistics** clears the statistics but keeps your settings.
+Statistics and settings are saved in the browser's `localStorage`, so they persist between visits:
+
+- `declination-trainer-v1`: statistics and the exercise, noun, gender and case selections
+- `declination-theme`: the theme (`system`, `light` or `dark`)
+- `declination-view`: the desktop/phone choice, once you've used the switch link **Reset statistics** clears the statistics but keeps your settings.
 
 ## Files
 

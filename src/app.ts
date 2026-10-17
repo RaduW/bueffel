@@ -550,6 +550,34 @@ $('reset').addEventListener('click', () => {
   newQuestion();
 });
 
+// Theme: 'system' follows the device's light/dark setting; 'light' and 'dark'
+// override it. The script in each page's <head> applies the stored choice
+// before the first paint.
+const THEME_KEY = 'declination-theme';
+
+function storedTheme(): string {
+  try {
+    return localStorage.getItem(THEME_KEY) ?? 'system';
+  } catch {
+    return 'system';
+  }
+}
+
+function applyTheme(theme: string) {
+  if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+  else delete document.documentElement.dataset.theme;
+}
+
+for (const radio of document.querySelectorAll<HTMLInputElement>('#theme-choice input')) {
+  radio.checked = radio.value === storedTheme();
+  radio.addEventListener('change', () => {
+    applyTheme(radio.value);
+    try {
+      localStorage.setItem(THEME_KEY, radio.value);
+    } catch { /* storage unavailable: theme lasts for this visit only */ }
+  });
+}
+
 // Link to the other version of the page; remember the choice so that
 // index.html's redirect respects it (see the script in its <head>)
 const switchView = document.getElementById('switch-view');
