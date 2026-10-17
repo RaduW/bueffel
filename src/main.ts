@@ -377,7 +377,9 @@ function newQuestion() {
 function renderQuestion() {
   const q = current!;
   const c = CASES[q.ci];
-  $('q-case').innerHTML = `${c.name}<small>${c.question}</small>`;
+  const caseBadge = $('q-case');
+  caseBadge.innerHTML = `${c.name}<small>${c.question}</small>`;
+  caseBadge.className = 'case-badge case-' + c.id;
   $('q-exercise').textContent = q.exercise.name;
   $('q-noun').textContent = q.noun.w;
   const gender = $('q-gender');

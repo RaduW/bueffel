@@ -13,6 +13,10 @@
   --n: #1f8a4c;
   --f: #c62f4f;
   --p: #7a4cc2;
+  --case-nom: #3793e6;
+  --case-akk: #d9480f;
+  --case-dat: #1f8a4c;
+  --case-gen: #4527a0;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -31,6 +35,10 @@
     --n: #5fd08d;
     --f: #ff8199;
     --p: #b99bff;
+    --case-nom: #4a9bf0;
+    --case-akk: #e8590c;
+    --case-dat: #2a9a5a;
+    --case-gen: #5a3fd0;
   }
 }
 
@@ -114,12 +122,16 @@ fieldset label { display: inline-flex; align-items: center; gap: 6px; cursor: po
 .case-badge {
   display: inline-block;
   background: var(--accent);
-  color: var(--surface);
+  color: #fff;
   font-weight: 700;
   border-radius: 999px;
   padding: 4px 16px;
   font-size: 1.1rem;
 }
+.case-badge.case-nom { background: var(--case-nom); }
+.case-badge.case-akk { background: var(--case-akk); }
+.case-badge.case-dat { background: var(--case-dat); }
+.case-badge.case-gen { background: var(--case-gen); }
 .case-badge small { font-weight: 400; opacity: 0.85; margin-left: 6px; }
 .exercise-name { color: var(--muted); font-size: 0.85rem; margin-top: 6px; }
 .given { margin-top: 12px; font-size: 1.6rem; display: flex; justify-content: center; align-items: baseline; gap: 12px; flex-wrap: wrap; }
