@@ -70,6 +70,14 @@
           <label><input type="radio" name="theme" value="dark"> Dark</label>
         </div>
       </fieldset>
+      <fieldset>
+        <legend>History</legend>
+        <p class="hint">A permanent log of your results per day, for tracking progress. <em>Reset statistics</em> doesn't touch it.</p>
+        <div id="history-row">
+          <button id="clear-history" class="danger">Clear history</button>
+          <span id="history-status" class="hint" role="status"></span>
+        </div>
+      </fieldset>
       <p id="settings-error" class="error" hidden></p>
       <div class="dialog-actions">
         <a id="switch-view" href="mobile.html" data-view="mobile">Phone version</a>

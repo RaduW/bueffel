@@ -134,6 +134,9 @@ fieldset > div { display: flex; flex-direction: column; gap: 6px; }
 #gender-list, #case-list { flex-direction: row; flex-wrap: wrap; gap: 6px 16px; }
 .dialog-actions { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 20px; }
 .dialog-actions a { color: var(--muted); font-size: 0.9rem; }
+.hint { color: var(--muted); font-size: 0.85rem; margin: 0 0 8px; }
+#history-row { flex-direction: row; align-items: center; gap: 12px; }
+#history-row .hint { margin: 0; }
 
 /* Segmented control (settings: theme) */
 fieldset > .segmented {

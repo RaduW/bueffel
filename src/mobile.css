@@ -85,6 +85,8 @@ body.mobile {
 }
 .mobile fieldset label { min-height: 40px; }
 .mobile fieldset input[type="checkbox"] { width: 20px; height: 20px; }
-.mobile .dialog-actions button { min-height: 44px; }
+.mobile .dialog-actions { justify-content: flex-start; flex-wrap: wrap; gap: 8px; }
+.mobile .dialog-actions button { min-height: 44px; padding: 0 10px; font-size: 0.9rem; white-space: nowrap; }
+.mobile #close-settings { margin-left: auto; }
 .mobile .switch { text-align: center; margin: 16px 0 0; font-size: 0.9rem; }
 .mobile .switch a { color: var(--muted); }

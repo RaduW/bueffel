@@ -1,6 +1,8 @@
 // Shared by the desktop page (index.html) and the phone page (mobile.html).
 // Elements that only one of the pages has are looked up as optional.
 
+import { clearHistory, recordResult, type DayCounts } from './history.ts'
+
 type Gender = 'm' | 'n' | 'f' | 'p'
 type CaseIndex = 0 | 1 | 2 | 3
 type Table = Record<Gender, string[]>
@@ -467,6 +469,7 @@ function choose(slot: Question['slots'][number], opt: string, btn: HTMLButtonEle
     exStats(current.exercise.id).shown++;
     saveState();
     renderStats();
+    record(current, { shown: 1 });
   }
 
   if (opt === slot.answer) {
@@ -480,7 +483,13 @@ function choose(slot: Question['slots'][number], opt: string, btn: HTMLButtonEle
     btn.classList.add('wrong');
     btn.disabled = true;
     current.mistakes++;
+    record(current, { mistakes: 1 });
   }
+}
+
+// Add to today's record in the long-term history (IndexedDB, see history.ts)
+function record(q: Question, delta: Partial<DayCounts>) {
+  void recordResult({ exercise: q.exercise.id, caseId: CASES[q.ci].id, gender: q.noun.g, delta });
 }
 
 function finish(q: Question) {
@@ -491,6 +500,7 @@ function finish(q: Question) {
     st.perfect++;
     st.streak++;
     exStats(q.exercise.id).perfect++;
+    record(q, { perfect: 1 });
   } else {
     st.streak = 0;
   }
@@ -510,7 +520,11 @@ function finish(q: Question) {
 
 const settingsDialog = $<HTMLDialogElement>('settings');
 
-$('open-settings').addEventListener('click', () => settingsDialog.showModal());
+$('open-settings').addEventListener('click', () => {
+  const status = document.getElementById('history-status');
+  if (status) status.textContent = '';
+  settingsDialog.showModal();
+});
 
 // The dialog stays open until the settings allow at least one question
 function closeSettings() {
@@ -543,11 +557,35 @@ $('skip').addEventListener('click', () => {
 });
 
 $('reset').addEventListener('click', () => {
-  if (!confirm('Reset all statistics?')) return;
+  if (!confirm('Reset the current statistics?\n\nYour daily history is kept. To delete it, use Settings → Clear history.')) return;
   state.stats = defaultState().stats;
   saveState();
   renderStats();
   newQuestion();
+});
+
+// Only this button deletes the long-term history (IndexedDB, see history.ts)
+$('clear-history').addEventListener('click', async () => {
+  if (!confirm('Delete the whole daily history?\n\nThis cannot be undone. The current statistics are kept.')) return;
+  let message: string;
+  try {
+    await clearHistory();
+    message = 'History cleared.';
+  } catch (e) {
+    console.warn('Could not clear daily history', e);
+    message = 'Could not clear the history.';
+  }
+  // The desktop page has a status line; the phone page shows it on the button
+  const status = document.getElementById('history-status');
+  if (status) {
+    status.textContent = message;
+  } else {
+    const btn = $<HTMLButtonElement>('clear-history');
+    const label = btn.textContent;
+    btn.textContent = message.replace(/\.$/, '');
+    btn.disabled = true;
+    setTimeout(() => { btn.textContent = label; btn.disabled = false; }, 2000);
+  }
 });
 
 // Theme: 'system' follows the device's light/dark setting; 'light' and 'dark'

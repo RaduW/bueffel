@@ -100,7 +100,15 @@ Statistics and settings are saved in the browser's `localStorage`, so they persi
 
 - `declination-trainer-v1`: statistics and the exercise, noun, gender and case selections
 - `declination-theme`: the theme (`system`, `light` or `dark`)
-- `declination-view`: the desktop/phone choice, once you've used the switch link **Reset statistics** clears the statistics but keeps your settings.
+- `declination-view`: the desktop/phone choice, once you've used the switch link
+
+**Reset statistics** clears these statistics but keeps your settings and the daily history below.
+
+### Daily history (IndexedDB)
+
+The app also keeps a permanent log with one record per calendar day, in the browser's IndexedDB (database `declination-history`, store `days`). It isn't shown in the app yet. Each day records questions started (`shown`), questions solved without a mistake (`perfect`) and wrong clicks (`mistakes`). These are kept as a total and broken down by exercise, case and gender. **Reset statistics** does not clear this history; to delete it, use **Settings → Clear history**.
+
+To look at it, open the browser's developer tools: **Application → IndexedDB → declination-history → days** in Chrome or Edge, or **Storage → Indexed DB** in Firefox and Safari. The app also asks the browser to keep its storage permanently; Firefox may show a prompt for this.
 
 ## Files
 
@@ -109,6 +117,7 @@ Statistics and settings are saved in the browser's `localStorage`, so they persi
 | `index.html` | Desktop page (Vite entry point); sends phones to `mobile.html` |
 | `mobile.html` | Phone page (Vite entry point) |
 | `src/app.ts` | Shared logic: declination tables, nouns, questions, statistics |
+| `src/history.ts` | Daily history in IndexedDB |
 | `src/main.ts` | Desktop page entry: loads the styles and `app.ts` |
 | `src/mobile.ts` | Phone page entry: loads the styles, phone overrides and `app.ts` |
 | `src/style.css` | Shared styling (light and dark mode) |
