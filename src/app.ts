@@ -504,7 +504,12 @@ function spanRows(el: HTMLTableCellElement, rows: number): HTMLTableCellElement 
 let current: Question | null = null;
 let lastKey = '';
 
+// Pending move to the next question after a solved one
+let advanceTimer: number | undefined;
+const ADVANCE_DELAY_MS = 1000;
+
 function newQuestion() {
+  clearTimeout(advanceTimer);
   showSettingsProblem();
   const valid = settingsValid();
   $('card').hidden = !valid;
@@ -639,6 +644,11 @@ function finish(q: Question) {
     ? '✓ Correct, no mistakes!'
     : `Done with ${q.mistakes} mistake${q.mistakes === 1 ? '' : 's'}.`;
   $('next').focus();
+  // Move on by itself shortly; Next still works for skipping the wait.
+  // Don't swap the question behind an open dialog
+  advanceTimer = window.setTimeout(() => {
+    if (current === q && !settingsDialog.open && !tablesDialog.open) newQuestion();
+  }, ADVANCE_DELAY_MS);
 }
 
 // ---------- Wiring ----------
