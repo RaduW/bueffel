@@ -425,9 +425,9 @@ function renderTables() {
     box.append(hint);
   }
 
-  // The phone page is too narrow for four columns: each case gets two sub-rows,
+  // A phone in portrait is too narrow for four columns: each case gets two sub-rows,
   // so the first column holds Maskulin over Neutrum and the second Feminin over Plural
-  const groups: Gender[][] = document.body.classList.contains('mobile') ? [['m', 'f'], ['n', 'p']] : [GENDERS];
+  const groups: Gender[][] = narrowTables() ? [['m', 'f'], ['n', 'p']] : [GENDERS];
 
   for (const ex of shown) {
     const title = document.createElement('h2');
@@ -436,9 +436,17 @@ function renderTables() {
   }
 }
 
+// Phone page in portrait (landscape has room for the desktop layout)
+const NARROW = matchMedia('(max-width: 599px)');
+
+function narrowTables(): boolean {
+  return document.body.classList.contains('mobile') && NARROW.matches;
+}
+
 // With more than one gender group, each case and the header get one sub-row per group
 function exerciseTable(ex: Exercise, groups: Gender[][]): HTMLElement {
   const table = document.createElement('table');
+  if (groups.length > 1) table.className = 'split';
 
   const head = table.createTHead();
   groups.forEach((genders, gi) => {
@@ -656,9 +664,16 @@ const tablesDialog = $<HTMLDialogElement>('tables-dialog');
 $('open-tables').addEventListener('click', () => {
   renderTables();
   tablesDialog.showModal();
+  // Opening focuses Done, which scrolls a long dialog to the end; start at the top
+  tablesDialog.scrollTop = 0;
 });
 
 $('close-tables').addEventListener('click', () => tablesDialog.close());
+
+// Turning the phone switches between the split and the four-column layout
+NARROW.addEventListener('change', () => {
+  if (tablesDialog.open) renderTables();
+});
 
 settingsDialog.addEventListener('cancel', e => {
   e.preventDefault();
