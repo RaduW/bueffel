@@ -22,11 +22,16 @@ interface Slot {
   answer: string
 }
 
+// A word for the summary tables, split into [stem, ending]
+type Word = [string, string]
+
 interface Exercise {
   id: string
   name: string
   adjective?: boolean
   build(noun: Noun, ci: CaseIndex, adj: string): Slot[]
+  // One cell of the summary table, using the example nouns and 'alt'
+  sample(g: Gender, ci: CaseIndex): Word[]
 }
 
 interface Counts {
@@ -168,12 +173,18 @@ const EXERCISES: Exercise[] = [
         nounSlot(noun, ci),
       ];
     },
+    sample(g, ci) {
+      return [defWord(g, ci), sampleNoun(g, ci)];
+    },
   },
   {
     id: 'indef',
     name: 'ein / kein / mein … + noun',
     build(noun, ci) {
       return [einSlot(noun, ci), nounSlot(noun, ci)];
+    },
+    sample(g, ci) {
+      return [[g === 'p' ? 'kein' : '(k)ein', EIN_ENDING[g][ci]], sampleNoun(g, ci)];
     },
   },
   {
@@ -182,6 +193,9 @@ const EXERCISES: Exercise[] = [
     adjective: true,
     build(noun, ci, adj) {
       return [adjSlot(adj, ADJ_ENDING.strong[noun.g][ci]), nounSlot(noun, ci)];
+    },
+    sample(g, ci) {
+      return [['alt', ADJ_ENDING.strong[g][ci]], sampleNoun(g, ci)];
     },
   },
   {
@@ -195,6 +209,9 @@ const EXERCISES: Exercise[] = [
         nounSlot(noun, ci),
       ];
     },
+    sample(g, ci) {
+      return [defWord(g, ci), ['alt', ADJ_ENDING.weak[g][ci]], sampleNoun(g, ci)];
+    },
   },
   {
     id: 'mixed',
@@ -202,6 +219,9 @@ const EXERCISES: Exercise[] = [
     adjective: true,
     build(noun, ci, adj) {
       return [einSlot(noun, ci), adjSlot(adj, ADJ_ENDING.mixed[noun.g][ci]), nounSlot(noun, ci)];
+    },
+    sample(g, ci) {
+      return [[g === 'p' ? 'kein' : 'ein', EIN_ENDING[g][ci]], ['alt', ADJ_ENDING.mixed[g][ci]], sampleNoun(g, ci)];
     },
   },
 ];
@@ -221,6 +241,19 @@ function einSlot(noun: Noun, ci: CaseIndex): Slot {
 
 function adjSlot(adj: string, ending: string): Slot {
   return { label: 'Adjective', options: ENDING_OPTIONS.map(e => adj + e), answer: adj + ending };
+}
+
+// The example nouns of the summary tables: Mann, Kind, Frau, Leute
+const SAMPLE_NOUN = Object.fromEntries(NOUN_POOLS.core.nouns.map(n => [n.g, n])) as Record<Gender, Noun>;
+
+// der / den / dem ... with everything after the d as the ending
+function defWord(g: Gender, ci: CaseIndex): Word {
+  return ['d', DEF_ARTICLE[g][ci].slice(1)];
+}
+
+function sampleNoun(g: Gender, ci: CaseIndex): Word {
+  const noun = SAMPLE_NOUN[g];
+  return [noun.w, nounForm(noun, ci).slice(noun.w.length)];
 }
 
 // ---------- Persistence ----------
@@ -372,6 +405,67 @@ function renderStats() {
     }
     body.append(tr);
   }
+}
+
+// ---------- Summary tables ----------
+
+const GENDER_HEADER: Record<Gender, string> = { m: 'Maskulin', n: 'Neutrum', f: 'Feminin', p: 'Plural' };
+
+// One table per selected exercise, like the ones in "German Declination.md".
+// Endings take the colour of their gender; the headers use the gender and case colours.
+function renderTables() {
+  const box = $('tables');
+  box.innerHTML = '';
+  const s = state.settings;
+  const shown = EXERCISES.filter(e => s.exercises.includes(e.id));
+  if (!shown.length) {
+    const hint = document.createElement('p');
+    hint.className = 'hint';
+    hint.textContent = 'Select at least one exercise in the settings to see its table.';
+    box.append(hint);
+  }
+
+  for (const ex of shown) {
+    const title = document.createElement('h2');
+    title.textContent = ex.name;
+    const table = document.createElement('table');
+    const head = table.createTHead().insertRow();
+    head.append(cell('th', 'Kasus'));
+    for (const g of GENDERS) head.append(cell('th', GENDER_HEADER[g], 'g-' + g));
+
+    const body = table.createTBody();
+    CASES.forEach((c, ci) => {
+      const tr = body.insertRow();
+      const th = cell('th', c.name.slice(0, 3), 'case-' + c.id);
+      th.title = c.name;
+      tr.append(th);
+      for (const g of GENDERS) {
+        const td = cell('td', '', 'g-' + g);
+        ex.sample(g, ci as CaseIndex).forEach(([stem, ending], i) => {
+          if (i) td.append(' ');
+          td.append(stem);
+          if (ending) {
+            const b = document.createElement('b');
+            b.textContent = ending;
+            td.append(b);
+          }
+        });
+        tr.append(td);
+      }
+    });
+
+    const scroll = document.createElement('div');
+    scroll.className = 'table-scroll';
+    scroll.append(table);
+    box.append(title, scroll);
+  }
+}
+
+function cell(tag: 'th' | 'td', text: string, className = ''): HTMLTableCellElement {
+  const el = document.createElement(tag);
+  el.textContent = text;
+  el.className = className;
+  return el;
 }
 
 // ---------- Questions ----------
@@ -533,17 +627,32 @@ function closeSettings() {
 
 $('close-settings').addEventListener('click', closeSettings);
 
+// Declension tables for the selected exercises, drawn fresh each time
+const tablesDialog = $<HTMLDialogElement>('tables-dialog');
+
+$('open-tables').addEventListener('click', () => {
+  renderTables();
+  tablesDialog.showModal();
+});
+
+$('close-tables').addEventListener('click', () => tablesDialog.close());
+
 settingsDialog.addEventListener('cancel', e => {
   e.preventDefault();
   closeSettings();
 });
 
 // Clicking the backdrop (outside the dialog box) closes it
-settingsDialog.addEventListener('click', e => {
-  const r = settingsDialog.getBoundingClientRect();
-  const inside = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
-  if (!inside) closeSettings();
-});
+function onBackdropClick(dialog: HTMLDialogElement, close: () => void) {
+  dialog.addEventListener('click', e => {
+    const r = dialog.getBoundingClientRect();
+    const inside = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+    if (!inside) close();
+  });
+}
+
+onBackdropClick(settingsDialog, closeSettings);
+onBackdropClick(tablesDialog, () => tablesDialog.close());
 
 $('next').addEventListener('click', newQuestion);
 
@@ -626,7 +735,7 @@ switchView?.addEventListener('click', () => {
 });
 
 document.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !settingsDialog.open && current && current.finished && document.activeElement !== $('next')) {
+  if (e.key === 'Enter' && !settingsDialog.open && !tablesDialog.open && current && current.finished && document.activeElement !== $('next')) {
     newQuestion();
   }
 });

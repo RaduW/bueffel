@@ -19,6 +19,13 @@
   <header>
     <div class="title">
       <h1>Deklination üben</h1>
+      <button id="open-tables" class="icon-button" title="Declension tables" aria-label="Declension tables">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+      </button>
       <button id="open-settings" class="icon-button" title="Settings" aria-label="Settings">
         <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <circle cx="12" cy="12" r="3"/>
@@ -34,6 +41,15 @@
       <div><span id="stat-streak">0</span><small>streak</small></div>
     </div>
   </header>
+
+  <dialog id="tables-dialog" class="tables-dialog" aria-labelledby="tables-title">
+    <h2 id="tables-title">Declension tables</h2>
+    <div id="tables" class="tables"></div>
+    <div class="dialog-actions">
+      <span></span>
+      <button id="close-tables" class="primary">Done</button>
+    </div>
+  </dialog>
 
   <dialog id="settings" aria-labelledby="settings-title">
     <h2 id="settings-title">Settings</h2>

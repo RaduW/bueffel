@@ -21,7 +21,8 @@ body.mobile {
   margin: 0;
   padding: calc(8px + env(safe-area-inset-top)) 12px 8px;
 }
-.mobile .title { justify-content: space-between; }
+.mobile .title { justify-content: space-between; gap: 0; }
+.mobile .title h1 { margin-right: auto; }
 .mobile h1 { font-size: 1.15rem; }
 .mobile .icon-button { border: none; background: none; padding: 8px; }
 
@@ -53,6 +54,11 @@ body.mobile {
   padding: 8px 4px;
   overflow-wrap: anywhere;
 }
+
+.mobile .tables table { font-size: 0.8rem; }
+.mobile .tables th, .mobile .tables td { padding: 5px 6px; }
+/* Wrap long phrases rather than scroll sideways */
+.mobile .tables td { white-space: normal; }
 
 .bottom-bar {
   position: fixed;
@@ -87,6 +93,6 @@ body.mobile {
 .mobile fieldset input[type="checkbox"] { width: 20px; height: 20px; }
 .mobile .dialog-actions { justify-content: flex-start; flex-wrap: wrap; gap: 8px; }
 .mobile .dialog-actions button { min-height: 44px; padding: 0 10px; font-size: 0.9rem; white-space: nowrap; }
-.mobile #close-settings { margin-left: auto; }
+.mobile #close-settings, .mobile #close-tables { margin-left: auto; }
 .mobile .switch { text-align: center; margin: 16px 0 0; font-size: 0.9rem; }
 .mobile .switch a { color: var(--muted); }
