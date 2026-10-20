@@ -436,20 +436,14 @@ function renderTables() {
   }
 }
 
-const GENDER_SHORT: Record<Gender, string> = { m: 'Mask', n: 'Neut', f: 'Fem', p: 'Pl' };
-
-// With more than one gender group, a narrow column labels each sub-row
+// With more than one gender group, each case and the header get one sub-row per group
 function exerciseTable(ex: Exercise, groups: Gender[][]): HTMLElement {
-  const split = groups.length > 1;
   const table = document.createElement('table');
 
   const head = table.createTHead();
   groups.forEach((genders, gi) => {
     const tr = head.insertRow();
-    if (gi === 0) {
-      tr.append(spanRows(cell('th', 'Kasus', 'corner'), groups.length));
-      if (split) tr.append(spanRows(cell('th', '', 'corner'), groups.length));
-    }
+    if (gi === 0) tr.append(spanRows(cell('th', 'Kasus', 'corner'), groups.length));
     for (const g of genders) tr.append(cell('th', GENDER_HEADER[g], 'g-' + g));
   });
 
@@ -462,11 +456,6 @@ function exerciseTable(ex: Exercise, groups: Gender[][]): HTMLElement {
         const th = spanRows(cell('th', c.name.slice(0, 3), 'case-' + c.id), groups.length);
         th.title = c.name;
         tr.append(th);
-      }
-      if (split) {
-        const label = cell('th', '', 'split');
-        for (const g of genders) label.append(span(GENDER_SHORT[g], 'g-' + g));
-        tr.append(label);
       }
       for (const g of genders) {
         const td = cell('td', '', 'g-' + g);
@@ -499,13 +488,6 @@ function cell(tag: 'th' | 'td', text: string, className = ''): HTMLTableCellElem
 
 function spanRows(el: HTMLTableCellElement, rows: number): HTMLTableCellElement {
   el.rowSpan = rows;
-  return el;
-}
-
-function span(text: string, className: string): HTMLSpanElement {
-  const el = document.createElement('span');
-  el.textContent = text;
-  el.className = className;
   return el;
 }
 

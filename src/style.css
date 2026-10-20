@@ -257,8 +257,6 @@ dialog.tables-dialog { width: min(760px, calc(100vw - 32px)); }
 .tables thead th.corner { color: var(--muted); border-bottom-color: var(--border); }
 /* Split table (phone): sub-rows of one case are divided by a dashed line */
 .tables tr.sub > :not([rowspan="2"]) { border-bottom-style: dashed; }
-.tables tbody th.split { color: inherit; font-size: 0.7rem; line-height: 1.25; }
-.tables th.split span { display: block; color: var(--g); }
 .tables tbody th { color: #fff; font-weight: 700; width: 1%; }
 .tables th.case-nom { background: var(--case-nom); }
 .tables th.case-akk { background: var(--case-akk); }

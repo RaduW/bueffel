@@ -55,7 +55,7 @@ body.mobile {
   overflow-wrap: anywhere;
 }
 
-.mobile .tables table { font-size: 1rem; }
+.mobile .tables table { font-size: 1.1rem; }
 /* Equal widths for the two gender columns */
 .mobile .tables td { width: 50%; }
 .mobile .tables th, .mobile .tables td { padding: 5px 6px; }
