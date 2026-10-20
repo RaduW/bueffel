@@ -425,21 +425,50 @@ function renderTables() {
     box.append(hint);
   }
 
+  // The phone page is too narrow for four columns: each case gets two sub-rows,
+  // so the first column holds Maskulin over Neutrum and the second Feminin over Plural
+  const groups: Gender[][] = document.body.classList.contains('mobile') ? [['m', 'f'], ['n', 'p']] : [GENDERS];
+
   for (const ex of shown) {
     const title = document.createElement('h2');
     title.textContent = ex.name;
-    const table = document.createElement('table');
-    const head = table.createTHead().insertRow();
-    head.append(cell('th', 'Kasus'));
-    for (const g of GENDERS) head.append(cell('th', GENDER_HEADER[g], 'g-' + g));
+    box.append(title, exerciseTable(ex, groups));
+  }
+}
 
-    const body = table.createTBody();
-    CASES.forEach((c, ci) => {
+const GENDER_SHORT: Record<Gender, string> = { m: 'Mask', n: 'Neut', f: 'Fem', p: 'Pl' };
+
+// With more than one gender group, a narrow column labels each sub-row
+function exerciseTable(ex: Exercise, groups: Gender[][]): HTMLElement {
+  const split = groups.length > 1;
+  const table = document.createElement('table');
+
+  const head = table.createTHead();
+  groups.forEach((genders, gi) => {
+    const tr = head.insertRow();
+    if (gi === 0) {
+      tr.append(spanRows(cell('th', 'Kasus', 'corner'), groups.length));
+      if (split) tr.append(spanRows(cell('th', '', 'corner'), groups.length));
+    }
+    for (const g of genders) tr.append(cell('th', GENDER_HEADER[g], 'g-' + g));
+  });
+
+  const body = table.createTBody();
+  CASES.forEach((c, ci) => {
+    groups.forEach((genders, gi) => {
       const tr = body.insertRow();
-      const th = cell('th', c.name.slice(0, 3), 'case-' + c.id);
-      th.title = c.name;
-      tr.append(th);
-      for (const g of GENDERS) {
+      if (gi < groups.length - 1) tr.className = 'sub';
+      if (gi === 0) {
+        const th = spanRows(cell('th', c.name.slice(0, 3), 'case-' + c.id), groups.length);
+        th.title = c.name;
+        tr.append(th);
+      }
+      if (split) {
+        const label = cell('th', '', 'split');
+        for (const g of genders) label.append(span(GENDER_SHORT[g], 'g-' + g));
+        tr.append(label);
+      }
+      for (const g of genders) {
         const td = cell('td', '', 'g-' + g);
         ex.sample(g, ci as CaseIndex).forEach(([stem, ending], i) => {
           if (i) td.append(' ');
@@ -453,16 +482,28 @@ function renderTables() {
         tr.append(td);
       }
     });
+  });
 
-    const scroll = document.createElement('div');
-    scroll.className = 'table-scroll';
-    scroll.append(table);
-    box.append(title, scroll);
-  }
+  const scroll = document.createElement('div');
+  scroll.className = 'table-scroll';
+  scroll.append(table);
+  return scroll;
 }
 
 function cell(tag: 'th' | 'td', text: string, className = ''): HTMLTableCellElement {
   const el = document.createElement(tag);
+  el.textContent = text;
+  el.className = className;
+  return el;
+}
+
+function spanRows(el: HTMLTableCellElement, rows: number): HTMLTableCellElement {
+  el.rowSpan = rows;
+  return el;
+}
+
+function span(text: string, className: string): HTMLSpanElement {
+  const el = document.createElement('span');
   el.textContent = text;
   el.className = className;
   return el;
