@@ -55,7 +55,7 @@ body.mobile {
   overflow-wrap: anywhere;
 }
 
-.mobile .tables table { font-size: 1.1rem; }
+.mobile .tables table { font-size: 1.3rem; }
 /* Equal widths for the two gender columns of the portrait layout */
 .mobile .tables table.split td { width: 50%; }
 .mobile .tables th, .mobile .tables td { padding: 5px 6px; }
