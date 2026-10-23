@@ -242,7 +242,7 @@ button.primary { background: var(--accent); color: var(--surface); border-color:
 button.danger { color: var(--bad); }
 
 /* Summary tables: endings in their gender's colour, coloured headers */
-dialog.tables-dialog { width: min(760px, calc(100vw - 32px)); }
+dialog.tables-dialog { width: min(840px, calc(100vw - 32px)); }
 .tables h2 { font-size: 1rem; color: var(--muted); margin: 16px 0 8px; }
 .table-scroll {
   overflow-x: auto;
