@@ -14,7 +14,6 @@ export interface State {
 // (e.g. raduw.github.io) share this storage
 const STATE_KEY = 'bueffel-state-v1';
 const THEME_KEY = 'bueffel-theme';
-export const VIEW_KEY = 'bueffel-view';
 
 export function defaultState(): State {
   return { settings: defaultSettings(), stats: emptyStats() };
@@ -55,10 +54,4 @@ export function saveTheme(theme: Theme) {
 export function applyTheme(theme: Theme) {
   if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
   else delete document.documentElement.dataset.theme;
-}
-
-export function saveView(view: string) {
-  try {
-    localStorage.setItem(VIEW_KEY, view);
-  } catch { /* storage unavailable: the link still works for this visit */ }
 }

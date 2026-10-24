@@ -5,7 +5,7 @@ import type { Question, SlotState } from '../core/question.ts'
 interface Props {
   question: Question
   onChoose: (slotIndex: number, opt: string) => void
-  // Shown at the bottom of the card (the result on the desktop page)
+  // Shown at the bottom of the card (the result, in the wide layout)
   children?: ReactNode
 }
 

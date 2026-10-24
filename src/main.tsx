@@ -1,4 +1,3 @@
-// Desktop page
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { App } from './ui/App.tsx'
@@ -6,6 +5,6 @@ import './style.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App variant="desktop" />
+    <App />
   </StrictMode>,
 );

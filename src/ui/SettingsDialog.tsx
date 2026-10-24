@@ -3,8 +3,7 @@ import { EXERCISES } from '../core/exercises.ts'
 import { CASES, GENDER_LABEL, GENDERS } from '../core/grammar.ts'
 import { NOUN_POOLS } from '../core/nouns.ts'
 import type { Settings } from '../core/settings.ts'
-import { applyTheme, loadTheme, saveTheme, saveView, type Theme } from '../core/storage.ts'
-import type { Variant } from './App.tsx'
+import { applyTheme, loadTheme, saveTheme, type Theme } from '../core/storage.ts'
 import { Modal } from './Modal.tsx'
 
 interface Props {
@@ -12,7 +11,8 @@ interface Props {
   settings: Settings
   // Why the settings allow no question, shown in the dialog
   problem: string | null
-  variant: Variant
+  // Phone layout: history and reset buttons in the action row
+  compact: boolean
   onChange: (s: Settings) => void
   onClose: () => void
   onClosed: () => void
@@ -35,9 +35,9 @@ const THEMES: { value: Theme; label: string }[] = [
 ];
 
 export function SettingsDialog(props: Props) {
-  const { open, settings, problem, variant, onChange, onClose, onClosed, onClearHistory, onResetStats } = props;
+  const { open, settings, problem, compact, onChange, onClose, onClosed, onClearHistory, onResetStats } = props;
   const [theme, setTheme] = useState(loadTheme);
-  // Result of Clear history: a status line on desktop, the button's label on the phone
+  // Result of Clear history: a status line, or in the compact layout the button's label
   const [historyMessage, setHistoryMessage] = useState('');
 
   // Start without the previous message each time the dialog opens
@@ -45,12 +45,12 @@ export function SettingsDialog(props: Props) {
     if (open) setHistoryMessage('');
   }, [open]);
 
-  // The phone shows the message on the button for a moment
+  // The compact layout shows the message on the button for a moment
   useEffect(() => {
-    if (variant !== 'mobile' || !historyMessage) return;
+    if (!compact || !historyMessage) return;
     const timer = setTimeout(() => setHistoryMessage(''), 2000);
     return () => clearTimeout(timer);
-  }, [variant, historyMessage]);
+  }, [compact, historyMessage]);
 
   function changeTheme(t: Theme) {
     setTheme(t);
@@ -63,7 +63,7 @@ export function SettingsDialog(props: Props) {
     if (message) setHistoryMessage(message);
   }
 
-  const clearButton = variant === 'mobile' && historyMessage
+  const clearButton = compact && historyMessage
     ? <button className="danger" disabled>{historyMessage.replace(/\.$/, '')}</button>
     : <button className="danger" onClick={clearHistory}>Clear history</button>;
 
@@ -90,7 +90,7 @@ export function SettingsDialog(props: Props) {
         </div>
       </fieldset>
 
-      {variant === 'desktop' && (
+      {!compact && (
         <fieldset>
           <legend>History</legend>
           <p className="hint">A permanent log of your results per day, for tracking progress. <em>Reset statistics</em> doesn't touch it.</p>
@@ -103,21 +103,15 @@ export function SettingsDialog(props: Props) {
 
       {problem && <p className="error">{problem}</p>}
 
-      {variant === 'desktop' ? (
-        <div className="dialog-actions">
-          <a href="mobile.html" onClick={() => saveView('mobile')}>Phone version</a>
-          <button id="close-settings" className="primary" onClick={onClose}>Done</button>
-        </div>
-      ) : (
-        <>
-          <div className="dialog-actions">
+      <div className="dialog-actions">
+        {compact ? (
+          <>
             {clearButton}
             <button className="danger" onClick={onResetStats}>Reset statistics</button>
-            <button id="close-settings" className="primary" onClick={onClose}>Done</button>
-          </div>
-          <p className="switch"><a href="index.html" onClick={() => saveView('desktop')}>Desktop version</a></p>
-        </>
-      )}
+          </>
+        ) : <span></span>}
+        <button id="close-settings" className="primary" onClick={onClose}>Done</button>
+      </div>
     </Modal>
   );
 }

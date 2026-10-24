@@ -7,7 +7,7 @@ interface Props {
   onReset: () => void
 }
 
-// Per-exercise statistics with Skip and Reset (desktop page only)
+// Per-exercise statistics with Skip and Reset (wide layout only)
 export function Breakdown({ stats, onSkip, onReset }: Props) {
   return (
     <section className="breakdown">

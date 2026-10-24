@@ -6,12 +6,6 @@ export default defineConfig({
   // Relative asset paths, so the build works under any sub-path
   // (e.g. GitHub Pages serves it from /bueffel/)
   base: './',
-  build: {
-    // Two pages: desktop (index.html) and phone (mobile.html)
-    rollupOptions: {
-      input: { main: 'index.html', mobile: 'mobile.html' },
-    },
-  },
   plugins: [
     react(),
     VitePWA({

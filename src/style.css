@@ -84,18 +84,20 @@ body {
   font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
-main {
+/* Header and main share one centred column */
+main, .app > header {
   max-width: 760px;
   margin: 0 auto;
-  padding: 24px 16px 48px;
+  padding: 0 16px 48px;
 }
 
-header {
+.app > header {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+  padding: 24px 16px 0;
   margin-bottom: 16px;
 }
 
@@ -284,3 +286,105 @@ dialog.tables-dialog { width: min(840px, calc(100vw - 32px)); }
   .stats { gap: 12px; }
   .given { font-size: 1.3rem; }
 }
+
+/* ---------- Compact layout (phones, narrow windows) ----------
+   App adds the .compact class; these rules override the ones above. */
+
+.app.compact {
+  /* Room for the fixed bottom bar */
+  padding-bottom: calc(76px + env(safe-area-inset-bottom));
+}
+
+.compact button {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Touch screens keep :hover after a tap; don't let it look like a selection */
+@media (hover: none) {
+  .compact button:hover:not(:disabled) { border-color: var(--border); }
+  .compact .icon-button:hover { color: var(--muted); }
+}
+
+.compact > header {
+  display: block;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: calc(8px + env(safe-area-inset-top)) 12px 8px;
+}
+.compact .title { justify-content: space-between; gap: 0; }
+.compact .title h1 { margin-right: auto; }
+.compact h1 { font-size: 1.15rem; }
+.compact .icon-button { border: none; background: none; padding: 8px; }
+
+.compact .stats {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  margin-top: 6px;
+}
+.compact .stats span { font-size: 1.1rem; }
+.compact .stats small { font-size: 0.65rem; }
+
+.compact main { max-width: 560px; padding: 0 12px; }
+
+.compact .card { padding: 16px 14px; border-radius: 12px; margin: 0; }
+.compact .exercise-name { font-size: 0.75rem; }
+.compact .given { font-size: 1.35rem; gap: 8px; margin-top: 8px; }
+.compact .phrase { font-size: 1.25rem; margin: 12px 0 4px; min-height: 1.9rem; }
+
+.compact .slot { margin-top: 12px; }
+.compact .options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.compact .options button {
+  min-width: 0;
+  min-height: 48px;
+  padding: 8px 4px;
+  font-size: 1.3rem;
+  overflow-wrap: anywhere;
+}
+
+.compact .tables table { font-size: 1.3rem; }
+/* Equal widths for the two gender columns of the portrait layout */
+.compact .tables table.split td { width: 50%; }
+.compact .tables th, .compact .tables td { padding: 5px 6px; }
+/* Wrap long phrases rather than scroll sideways */
+.compact .tables td { white-space: normal; }
+
+.bottom-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+}
+.bottom-bar #skip { flex: 1; min-height: 48px; }
+.bottom-bar .result { flex: 1; margin: 0; flex-wrap: nowrap; }
+.bottom-bar #result-text { font-size: 0.95rem; }
+.bottom-bar #next { min-height: 48px; padding: 0 28px; }
+/* Once the question is solved, Next takes Skip's place */
+.bottom-bar:has(#result:not([hidden])) #skip { display: none; }
+
+/* Settings slide up from the bottom as a sheet */
+.compact dialog {
+  width: 100%;
+  max-width: 100%;
+  max-height: 85vh;
+  margin: auto 0 0;
+  border-radius: 16px 16px 0 0;
+  border-bottom: none;
+  padding: 20px 16px calc(16px + env(safe-area-inset-bottom));
+}
+.compact fieldset label { min-height: 40px; }
+.compact fieldset input[type="checkbox"] { width: 20px; height: 20px; }
+.compact .dialog-actions { justify-content: flex-start; flex-wrap: wrap; gap: 8px; }
+.compact .dialog-actions button { min-height: 44px; padding: 0 10px; font-size: 0.9rem; white-space: nowrap; }
+.compact #close-settings, .compact #close-tables { margin-left: auto; }

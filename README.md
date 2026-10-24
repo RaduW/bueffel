@@ -1,6 +1,11 @@
 # Büffel
 
-A small browser app for practising German declination: articles, _ein/kein_ words, adjective endings and noun endings. It is based on the tables in [German Declination.md](German%20Declination.md).
+A browser app for practising German, growing into a collection of exercises. The name comes from _büffeln_, German for cramming; anything you have to type (repository, URLs) spells it `bueffel`.
+
+The first exercises practise declension: articles, _ein/kein_ words, adjective endings and noun endings, based on the tables in [German Declination.md](German%20Declination.md).
+
+- **Use it online:** <https://raduw.github.io/bueffel/>
+- **Source:** <https://github.com/RaduW/bueffel>
 
 ## How to run it
 
@@ -18,7 +23,7 @@ Start the development server:
 npm run dev
 ```
 
-Then open the URL Vite prints, usually <http://localhost:5173>. The page reloads when you edit the source.
+Then open the URL Vite prints, usually <http://localhost:5173> (or the next free port, such as 5174, if another dev server is already running). The page reloads when you edit the source.
 
 To expose the dev server to other devices on your network, run `npm run dev -- --host`.
 
@@ -35,21 +40,19 @@ The `dist/` folder is a plain static site that you can host anywhere.
 
 ## Online version (GitHub Pages)
 
-The app is published at <https://raduw.github.io/declination-practice/>.
+The app is published at <https://raduw.github.io/bueffel/>.
 
 Every push to `main` builds and deploys the site automatically, using the workflow in `.github/workflows/deploy.yml`. You can also run it by hand from the repository's **Actions** tab (**Deploy to GitHub Pages → Run workflow**).
 
 One-time setup: in the repository on GitHub, go to **Settings → Pages** and set **Source** to **GitHub Actions**.
 
-## Phone version
+## Phones
 
-There is a separate page for smartphones, `mobile.html` (online: <https://raduw.github.io/declination-practice/mobile.html>). It has large tap targets and keeps **Skip** / **Next** in a bar at the bottom of the screen, within thumb reach. It leaves out the per-exercise table, and **Reset statistics** is in the settings sheet instead.
-
-Phones opening `index.html` are sent to the phone version automatically (small touch screens only). Each version has a link to the other in its settings: **Phone version** or **Desktop version**. Once you pick one, that choice is remembered on that device. Both versions share the same settings and statistics.
+The page adapts to the screen. On phones (and in windows narrower than 640px) it switches to a compact layout with large tap targets and **Skip** / **Next** in a bar at the bottom of the screen, within thumb reach. The compact layout leaves out the per-exercise table, and **Reset statistics** is in the settings sheet instead. Phones in landscape get the compact layout too. Switching layouts (turning the phone, resizing the window) keeps the current question and statistics.
 
 ## Installing it as an app
 
-The app is a Progressive Web App (PWA). You can install it from the online version, and it then works offline:
+The app is a Progressive Web App (PWA). You can install it from the [online version](https://raduw.github.io/bueffel/), and it then works offline. It installs as **Büffel**:
 
 - **Chrome / Edge (desktop or Android):** click the install icon in the address bar, or use the menu → **Install app** (or **Add to Home screen**).
 - **Safari on iPhone / iPad:** tap **Share → Add to Home Screen**.
@@ -92,7 +95,7 @@ The header shows:
 - **accuracy:** the share of questions with no mistakes
 - **streak:** how many questions in a row you've solved without a mistake
 
-The table below breaks these numbers down by exercise (desktop version only).
+The table below breaks these numbers down by exercise (wide layout only).
 
 A question only counts once you click your first answer, so reloading the page doesn't change the numbers.
 
@@ -100,7 +103,6 @@ Statistics and settings are saved in the browser's `localStorage`, so they persi
 
 - `bueffel-state-v1`: statistics and the exercise, noun, gender and case selections
 - `bueffel-theme`: the theme (`system`, `light` or `dark`)
-- `bueffel-view`: the desktop/phone choice, once you've used the switch link
 
 **Reset statistics** clears these statistics but keeps your settings and the daily history below.
 
@@ -114,19 +116,16 @@ To look at it, open the browser's developer tools: **Application → IndexedDB �
 
 | File | Purpose |
 |---|---|
-| `index.html` | Desktop page (Vite entry point); sends phones to `mobile.html` |
-| `mobile.html` | Phone page (Vite entry point) |
+| `index.html` | The page (Vite entry point) |
 | `src/core/` | Logic without UI: declension tables, nouns, exercises, questions, statistics, settings, storage |
 | `src/core/history.ts` | Daily history in IndexedDB |
 | `src/ui/` | React components; `App.tsx` holds the state and lays out the page |
-| `src/main.tsx` | Desktop page entry: loads the styles and renders `App` |
-| `src/mobile.tsx` | Phone page entry: loads the styles, phone overrides and renders `App` |
-| `src/style.css` | Shared styling (light and dark mode) |
-| `src/mobile.css` | Phone layout overrides |
+| `src/main.tsx` | Entry: loads the styles and renders `App` |
+| `src/style.css` | Styling (light and dark mode); the compact layout's rules are at the end, under `.compact` |
 | `public/favicon.svg` | Browser tab icon |
 | `public/*.png` | App icons for installing the PWA (Android, iOS, desktop) |
 | `icons/` | Icon sources (SVG): `bison.svg` (the app icon), its maskable variant, and `bison-head.svg`, an alternative not used yet. `icons/build.sh` regenerates the icons in `public/` (needs `rsvg-convert`) |
-| `vite.config.ts` | Vite config: relative `base` (so the build works on GitHub Pages), the two pages, and the PWA manifest and service worker (via `vite-plugin-pwa`) |
+| `vite.config.ts` | Vite config: relative `base` (so the build works on GitHub Pages) and the PWA manifest and service worker (via `vite-plugin-pwa`) |
 | `.github/workflows/deploy.yml` | Builds and deploys to GitHub Pages on every push to `main` |
 | `German Declination.md` | The grammar reference the exercises are based on |
 

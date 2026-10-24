@@ -18,11 +18,12 @@ exercise types are coming.
    exercises, question drawing/answering, stats, settings, storage, history).
    Functions there return new objects instead of mutating, so they can back
    React state (`useState`/`useReducer`) directly.
-2. **Done:** UI rebuilt in React (`src/ui/`). Both pages mount the same `App`
-   with `variant="desktop"` or `"mobile"`; the markup and CSS class names are
-   the same as before, so `style.css` / `mobile.css` are unchanged.
-3. **Next:** merge `index.html` and `mobile.html` into one responsive app (CSS / media
-   queries) instead of two pages kept in sync.
+2. **Done:** UI rebuilt in React (`src/ui/`).
+3. **Done:** one page (`index.html`). `App` picks the layout with a media query
+   (`COMPACT_QUERY`: narrow, or short touch screen = phone in landscape) and sets
+   the `compact` class; the compact rules are at the end of `style.css` under
+   `.compact`. JS decides (not CSS media queries) because the layouts place the
+   result and Skip/Next differently. Switching layouts keeps all state.
 
 Exercise-specific components can come once there is a second kind of exercise;
 today every exercise is "fill the slots by choosing options" (`QuestionCard`).
@@ -38,10 +39,10 @@ peer conflicts with workbox's Babel). `npm ci` works without the flag; a later
 - `src/core/exercises.ts`: exercise definitions (`build` slots, `sample` table cells)
 - `src/core/question.ts`: `createQuestion`, `answer`
 - `src/core/stats.ts`, `settings.ts`, `storage.ts`, `history.ts` (IndexedDB daily log)
-- `src/ui/App.tsx`: state (settings, stats, question), auto-advance, layout per variant
-- `src/ui/`: `Header`, `QuestionCard`, `ResultBanner`, `Breakdown` (desktop),
+- `src/ui/App.tsx`: state (settings, stats, question), auto-advance, wide or compact layout
+- `src/ui/`: `Header`, `QuestionCard`, `ResultBanner`, `Breakdown` (wide layout),
   `SettingsDialog`, `TablesDialog`, `Modal` (native `<dialog>`), `useMediaQuery`, `icons`
-- `src/main.tsx` / `src/mobile.tsx`: entries for `index.html` / `mobile.html`
+- `src/main.tsx`: entry for `index.html`
 
 ## Icon
 

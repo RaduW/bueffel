@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Büffel</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -13,14 +13,6 @@
       const theme = localStorage.getItem('bueffel-theme');
       if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
     } catch { /* storage unavailable: follow the system theme */ }
-
-    // Phones get the phone page, unless a version was picked explicitly
-    try {
-      const view = localStorage.getItem('bueffel-view');
-      if (view === 'mobile' || (view === null && matchMedia('(max-width: 640px) and (pointer: coarse)').matches)) {
-        location.replace('mobile.html');
-      }
-    } catch { /* storage unavailable: stay on this page */ }
   </script>
 </head>
 <body>

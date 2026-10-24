@@ -1,24 +1,23 @@
 import { exerciseById, type Exercise } from '../core/exercises.ts'
 import { CASES, GENDER_HEADER, GENDERS, type CaseIndex, type Gender } from '../core/grammar.ts'
-import type { Variant } from './App.tsx'
 import { Modal } from './Modal.tsx'
 import { useMediaQuery } from './useMediaQuery.ts'
 
 interface Props {
   open: boolean
   exerciseIds: string[]
-  variant: Variant
+  compact: boolean
   onClose: () => void
 }
 
 // One table per selected exercise, like the ones in "German Declination.md".
 // Endings take the colour of their gender; the headers use the gender and case colours.
-export function TablesDialog({ open, exerciseIds, variant, onClose }: Props) {
+export function TablesDialog({ open, exerciseIds, compact, onClose }: Props) {
   // A phone in portrait is too narrow for four columns: each case gets two sub-rows,
   // so the first column holds Maskulin over Neutrum and the second Feminin over Plural.
-  // Landscape has room for the desktop layout
+  // Landscape has room for four columns
   const portrait = useMediaQuery('(max-width: 599px)');
-  const groups: Gender[][] = variant === 'mobile' && portrait ? [['m', 'f'], ['n', 'p']] : [GENDERS];
+  const groups: Gender[][] = compact && portrait ? [['m', 'f'], ['n', 'p']] : [GENDERS];
   const exercises = exerciseIds.map(exerciseById).filter((e): e is Exercise => !!e);
 
   return (

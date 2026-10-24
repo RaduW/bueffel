@@ -1,8 +1,9 @@
 // The whole app. Owns settings, stats and the current question; the
 // components below it only display them and report clicks.
 //
-// variant: 'desktop' (index.html) or 'mobile' (mobile.html). The two share all
-// logic and differ only in where things are placed.
+// Two layouts on one page: the wide one, and a compact one for phones (bigger
+// tap targets, Skip / Next in a bar at the bottom). They differ only in where
+// things are placed; switching between them keeps all state.
 
 import { useEffect, useRef, useState } from 'react'
 import { CASES } from '../core/grammar.ts'
@@ -17,8 +18,10 @@ import { QuestionCard } from './QuestionCard.tsx'
 import { ResultBanner } from './ResultBanner.tsx'
 import { SettingsDialog } from './SettingsDialog.tsx'
 import { TablesDialog } from './TablesDialog.tsx'
+import { useMediaQuery } from './useMediaQuery.ts'
 
-export type Variant = 'desktop' | 'mobile'
+// Phones in portrait, narrow windows, and phones in landscape (short and touch)
+const COMPACT_QUERY = '(max-width: 640px), (pointer: coarse) and (max-height: 500px)';
 
 // Pause after a solved question before moving on by itself
 const ADVANCE_DELAY_MS = 1000;
@@ -26,10 +29,14 @@ const ADVANCE_DELAY_MS = 1000;
 // Read once at startup; saved again whenever settings or stats change
 const initial = loadState();
 
-export function App({ variant }: { variant: Variant }) {
+export function App() {
+  const compact = useMediaQuery(COMPACT_QUERY);
   const [settings, setSettings] = useState(initial.settings);
   const [stats, setStats] = useState(initial.stats);
-  const [question, setQuestion] = useState(() => createQuestion(initial.settings));
+  const [question, setQuestionState] = useState(() => createQuestion(initial.settings));
+  // The latest question, also between a click and the next render, so that two
+  // clicks in a row never both act on the same version
+  const latest = useRef(question);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [tablesOpen, setTablesOpen] = useState(false);
   const nextButton = useRef<HTMLButtonElement>(null);
@@ -40,8 +47,13 @@ export function App({ variant }: { variant: Variant }) {
 
   useEffect(() => saveState({ settings, stats }), [settings, stats]);
 
+  function setQuestion(q: Question | null) {
+    latest.current = q;
+    setQuestionState(q);
+  }
+
   function newQuestion() {
-    setQuestion(createQuestion(settings, question?.key));
+    setQuestion(createQuestion(settings, latest.current?.key));
   }
 
   // Move on by itself shortly after a question is solved; Next still works for
@@ -66,8 +78,8 @@ export function App({ variant }: { variant: Variant }) {
   }, [question, settings]);
 
   function choose(slotIndex: number, opt: string) {
-    if (!question) return;
-    const outcome = answer(question, slotIndex, opt);
+    if (!latest.current) return;
+    const outcome = answer(latest.current, slotIndex, opt);
     if (outcome.result === 'ignored') return;
     const q = outcome.question;
     setQuestion(q);
@@ -87,7 +99,8 @@ export function App({ variant }: { variant: Variant }) {
   }
 
   function skip() {
-    if (question && question.touched && !question.finished) setStats(withStreakBroken);
+    const q = latest.current;
+    if (q && q.touched && !q.finished) setStats(withStreakBroken);
     newQuestion();
   }
 
@@ -113,33 +126,35 @@ export function App({ variant }: { variant: Variant }) {
   function changeSettings(s: Settings) {
     setSettings(s);
     // Keep a question the user has already started; otherwise draw a new one
-    if (!question || !question.touched || question.finished) setQuestion(createQuestion(s, question?.key));
+    const q = latest.current;
+    if (!q || !q.touched || q.finished) setQuestion(createQuestion(s, q?.key));
   }
 
   const problem = settingsProblem(settings);
 
-  const header = (
-    <Header
-      stats={stats}
-      iconSize={variant === 'mobile' ? 24 : 22}
-      onOpenTables={() => setTablesOpen(true)}
-      onOpenSettings={() => setSettingsOpen(true)}
-    />
+  const result = question?.finished && (
+    <ResultBanner mistakes={question.mistakes} nextRef={nextButton} onNext={newQuestion} label={compact ? 'Next' : 'Next ⏎'} />
   );
 
-  const dialogs = (
-    <>
+  return (
+    <div className={compact ? 'app compact' : 'app'}>
+      <Header
+        stats={stats}
+        iconSize={compact ? 24 : 22}
+        onOpenTables={() => setTablesOpen(true)}
+        onOpenSettings={() => setSettingsOpen(true)}
+      />
       <TablesDialog
         open={tablesOpen}
         exerciseIds={settings.exercises}
-        variant={variant}
+        compact={compact}
         onClose={() => setTablesOpen(false)}
       />
       <SettingsDialog
         open={settingsOpen}
         settings={settings}
         problem={problem}
-        variant={variant}
+        compact={compact}
         onChange={changeSettings}
         // The dialog stays open until the settings allow at least one question
         onClose={() => { if (!problem) setSettingsOpen(false); }}
@@ -147,40 +162,21 @@ export function App({ variant }: { variant: Variant }) {
         onClearHistory={deleteHistory}
         onResetStats={resetStats}
       />
-    </>
-  );
-
-  const result = question?.finished && (
-    <ResultBanner mistakes={question.mistakes} nextRef={nextButton} onNext={newQuestion} label={variant === 'mobile' ? 'Next' : 'Next ⏎'} />
-  );
-
-  const card = question && (
-    <QuestionCard question={question} onChoose={choose}>
-      {variant === 'desktop' && result}
-    </QuestionCard>
-  );
-
-  if (variant === 'mobile') {
-    return (
-      <>
-        {header}
-        {dialogs}
-        <main>{card}</main>
-        {/* Thumb-reach bar: Skip while answering, result + Next once solved */}
+      <main>
+        {question && (
+          <QuestionCard question={question} onChoose={choose}>
+            {!compact && result}
+          </QuestionCard>
+        )}
+        {!compact && <Breakdown stats={stats} onSkip={skip} onReset={resetStats} />}
+      </main>
+      {compact && (
+        // Thumb-reach bar: Skip while answering, result + Next once solved
         <nav className="bottom-bar">
           {result || <button id="skip" onClick={skip}>Skip</button>}
         </nav>
-      </>
-    );
-  }
-
-  return (
-    <main>
-      {header}
-      {dialogs}
-      {card}
-      <Breakdown stats={stats} onSkip={skip} onReset={resetStats} />
-    </main>
+      )}
+    </div>
   );
 }
 
