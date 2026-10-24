@@ -12,7 +12,7 @@ export function Header({ stats, iconSize, onOpenTables, onOpenSettings }: Props)
   return (
     <header>
       <div className="title">
-        <h1>Bueffel</h1>
+        <h1>Büffel</h1>
         <button className="icon-button" title="Declension tables" aria-label="Declension tables" onClick={onOpenTables}>
           <HelpIcon size={iconSize} />
         </button>

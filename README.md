@@ -1,4 +1,4 @@
-# Bueffel
+# Büffel
 
 A small browser app for practising German declination: articles, _ein/kein_ words, adjective endings and noun endings. It is based on the tables in [German Declination.md](German%20Declination.md).
 

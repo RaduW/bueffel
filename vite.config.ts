@@ -23,8 +23,8 @@ export default defineConfig({
         // start_url, so an older app installed from the same address (e.g. the
         // Deklination app on localhost) blocks installing this one
         id: 'bueffel',
-        name: 'Bueffel',
-        short_name: 'Bueffel',
+        name: 'Büffel',
+        short_name: 'Büffel',
         description: 'Practise German: declension of articles, adjectives and nouns, and more to come.',
         lang: 'de',
         start_url: './',
