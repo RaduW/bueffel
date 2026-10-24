@@ -1,296 +1,22 @@
 // Shared by the desktop page (index.html) and the phone page (mobile.html).
 // Elements that only one of the pages has are looked up as optional.
+//
+// This file is only the DOM layer: grammar, questions, stats and storage
+// live in src/core and don't depend on the UI.
 
-import { clearHistory, recordResult, type DayCounts } from './history.ts'
-
-type Gender = 'm' | 'n' | 'f' | 'p'
-type CaseIndex = 0 | 1 | 2 | 3
-type Table = Record<Gender, string[]>
-
-interface Noun {
-  w: string
-  g: Gender
-  gen?: string
-  dat?: string
-  obl?: string
-  opts: string[]
-}
-
-interface Slot {
-  label: string
-  options: string[]
-  answer: string
-}
-
-// A word for the summary tables, split into [stem, ending]
-type Word = [string, string]
-
-interface Exercise {
-  id: string
-  name: string
-  adjective?: boolean
-  build(noun: Noun, ci: CaseIndex, adj: string): Slot[]
-  // One cell of the summary table, using the example nouns and 'alt'
-  sample(g: Gender, ci: CaseIndex): Word[]
-}
-
-interface Counts {
-  shown: number
-  perfect: number
-}
-
-interface State {
-  settings: { exercises: string[]; pools: string[]; genders: string[]; cases: string[] }
-  stats: Counts & { streak: number; byExercise: Record<string, Counts> }
-}
-
-interface Question {
-  exercise: Exercise
-  noun: Noun
-  ci: CaseIndex
-  adj: string | null
-  slots: (Slot & { solved: boolean })[]
-  mistakes: number
-  touched: boolean
-  finished: boolean
-}
-
-// ---------- Grammar data (from "German Declination.md") ----------
-
-// Case order everywhere: Nom, Akk, Dat, Gen
-const CASES = [
-  { id: 'nom', name: 'Nominativ', question: 'Wer? Was?' },
-  { id: 'akk', name: 'Akkusativ', question: 'Wen? Was?' },
-  { id: 'dat', name: 'Dativ', question: 'Wem?' },
-  { id: 'gen', name: 'Genitiv', question: 'Wessen?' },
-];
-
-const GENDER_LABEL: Record<Gender, string> = { m: 'maskulin', n: 'neutrum', f: 'feminin', p: 'Plural' };
-const GENDERS = Object.keys(GENDER_LABEL) as Gender[];
-
-const DEF_ARTICLE: Table = {
-  m: ['der', 'den', 'dem', 'des'],
-  n: ['das', 'das', 'dem', 'des'],
-  f: ['die', 'die', 'der', 'der'],
-  p: ['die', 'die', 'den', 'der'],
-};
-const DEF_OPTIONS = ['der', 'die', 'das', 'den', 'dem', 'des'];
-
-// Endings for ein / kein / mein ...
-const EIN_ENDING: Table = {
-  m: ['', 'en', 'em', 'es'],
-  n: ['', '', 'em', 'es'],
-  f: ['e', 'e', 'er', 'er'],
-  p: ['e', 'e', 'en', 'er'],
-};
-
-const ADJ_ENDING: Record<'strong' | 'weak' | 'mixed', Table> = {
-  strong: {
-    m: ['er', 'en', 'em', 'en'],
-    n: ['es', 'es', 'em', 'en'],
-    f: ['e', 'e', 'er', 'er'],
-    p: ['e', 'e', 'en', 'er'],
-  },
-  weak: {
-    m: ['e', 'en', 'en', 'en'],
-    n: ['e', 'e', 'en', 'en'],
-    f: ['e', 'e', 'en', 'en'],
-    p: ['en', 'en', 'en', 'en'],
-  },
-  mixed: {
-    m: ['er', 'en', 'en', 'en'],
-    n: ['es', 'es', 'en', 'en'],
-    f: ['e', 'e', 'en', 'en'],
-    p: ['en', 'en', 'en', 'en'],
-  },
-};
-const ENDING_OPTIONS = ['', 'e', 'en', 'em', 'er', 'es'];
-
-// ein has no plural, so plural questions use kein / possessives only
-const EIN_WORDS_SG = ['ein', 'kein', 'mein', 'dein', 'sein', 'ihr', 'unser'];
-const EIN_WORDS_PL = ['kein', 'mein', 'dein', 'sein', 'ihr', 'unser'];
-
-const ADJECTIVES = ['alt', 'jung', 'klein', 'groß', 'neu', 'gut', 'schön', 'nett'];
-
-// g: gender (p = plural), gen: Genitiv singular (m/n), dat: Dativ plural,
-// obl: n-noun form for Akk/Dat/Gen, opts: noun forms offered as choices
-const NOUN_POOLS: Record<string, { label: string; nouns: Noun[] }> = {
-  core: {
-    label: 'Mann, Kind, Frau, Leute',
-    nouns: [
-      { w: 'Mann', g: 'm', gen: 'Mannes', opts: ['Mann', 'Mannen', 'Mannes'] },
-      { w: 'Kind', g: 'n', gen: 'Kindes', opts: ['Kind', 'Kinden', 'Kindes'] },
-      { w: 'Frau', g: 'f', opts: ['Frau', 'Frauen', 'Fraus'] },
-      { w: 'Leute', g: 'p', dat: 'Leuten', opts: ['Leute', 'Leuten', 'Leutes'] },
-    ],
-  },
-  more: {
-    label: 'More nouns',
-    nouns: [
-      { w: 'Tisch', g: 'm', gen: 'Tisches', opts: ['Tisch', 'Tischen', 'Tisches'] },
-      { w: 'Vater', g: 'm', gen: 'Vaters', opts: ['Vater', 'Vatern', 'Vaters'] },
-      { w: 'Hund', g: 'm', gen: 'Hundes', opts: ['Hund', 'Hunden', 'Hundes'] },
-      { w: 'Lehrer', g: 'm', gen: 'Lehrers', opts: ['Lehrer', 'Lehrern', 'Lehrers'] },
-      { w: 'Haus', g: 'n', gen: 'Hauses', opts: ['Haus', 'Hausen', 'Hauses'] },
-      { w: 'Buch', g: 'n', gen: 'Buches', opts: ['Buch', 'Buchen', 'Buches'] },
-      { w: 'Fenster', g: 'n', gen: 'Fensters', opts: ['Fenster', 'Fenstern', 'Fensters'] },
-      { w: 'Auto', g: 'n', gen: 'Autos', opts: ['Auto', 'Auton', 'Autos'] },
-      { w: 'Stadt', g: 'f', opts: ['Stadt', 'Stadten', 'Stadts'] },
-      { w: 'Lampe', g: 'f', opts: ['Lampe', 'Lampen', 'Lampes'] },
-      { w: 'Tür', g: 'f', opts: ['Tür', 'Türen', 'Türs'] },
-      { w: 'Kinder', g: 'p', dat: 'Kindern', opts: ['Kinder', 'Kindern', 'Kinders'] },
-      { w: 'Männer', g: 'p', dat: 'Männern', opts: ['Männer', 'Männern', 'Männers'] },
-      { w: 'Bücher', g: 'p', dat: 'Büchern', opts: ['Bücher', 'Büchern', 'Büchers'] },
-      { w: 'Tische', g: 'p', dat: 'Tischen', opts: ['Tische', 'Tischen', 'Tisches'] },
-    ],
-  },
-  nnoun: {
-    label: 'n-nouns (Junge, Student …)',
-    nouns: [
-      { w: 'Junge', g: 'm', obl: 'Jungen', opts: ['Junge', 'Jungen', 'Junges'] },
-      { w: 'Kollege', g: 'm', obl: 'Kollegen', opts: ['Kollege', 'Kollegen', 'Kolleges'] },
-      { w: 'Student', g: 'm', obl: 'Studenten', opts: ['Student', 'Studenten', 'Studentes'] },
-      { w: 'Mensch', g: 'm', obl: 'Menschen', opts: ['Mensch', 'Menschen', 'Mensches'] },
-    ],
-  },
-};
-
-function nounForm(noun: Noun, ci: CaseIndex): string {
-  if (noun.obl) return ci === 0 ? noun.w : noun.obl;
-  if (noun.g === 'p') return ci === 2 ? noun.dat! : noun.w;
-  if (noun.g === 'f') return noun.w;
-  return ci === 3 ? noun.gen! : noun.w;
-}
-
-// Each exercise builds a list of slots: { label, options, answer }
-const EXERCISES: Exercise[] = [
-  {
-    id: 'def',
-    name: 'Definite article + noun',
-    build(noun, ci) {
-      return [
-        { label: 'Article', options: DEF_OPTIONS, answer: DEF_ARTICLE[noun.g][ci] },
-        nounSlot(noun, ci),
-      ];
-    },
-    sample(g, ci) {
-      return [defWord(g, ci), sampleNoun(g, ci)];
-    },
-  },
-  {
-    id: 'indef',
-    name: 'ein / kein / mein … + noun',
-    build(noun, ci) {
-      return [einSlot(noun, ci), nounSlot(noun, ci)];
-    },
-    sample(g, ci) {
-      return [[g === 'p' ? 'kein' : '(k)ein', EIN_ENDING[g][ci]], sampleNoun(g, ci)];
-    },
-  },
-  {
-    id: 'strong',
-    name: 'Adjective + noun (no article)',
-    adjective: true,
-    build(noun, ci, adj) {
-      return [adjSlot(adj, ADJ_ENDING.strong[noun.g][ci]), nounSlot(noun, ci)];
-    },
-    sample(g, ci) {
-      return [['alt', ADJ_ENDING.strong[g][ci]], sampleNoun(g, ci)];
-    },
-  },
-  {
-    id: 'weak',
-    name: 'der + adjective + noun',
-    adjective: true,
-    build(noun, ci, adj) {
-      return [
-        { label: 'Article', options: DEF_OPTIONS, answer: DEF_ARTICLE[noun.g][ci] },
-        adjSlot(adj, ADJ_ENDING.weak[noun.g][ci]),
-        nounSlot(noun, ci),
-      ];
-    },
-    sample(g, ci) {
-      return [defWord(g, ci), ['alt', ADJ_ENDING.weak[g][ci]], sampleNoun(g, ci)];
-    },
-  },
-  {
-    id: 'mixed',
-    name: 'ein / kein + adjective + noun',
-    adjective: true,
-    build(noun, ci, adj) {
-      return [einSlot(noun, ci), adjSlot(adj, ADJ_ENDING.mixed[noun.g][ci]), nounSlot(noun, ci)];
-    },
-    sample(g, ci) {
-      return [[g === 'p' ? 'kein' : 'ein', EIN_ENDING[g][ci]], ['alt', ADJ_ENDING.mixed[g][ci]], sampleNoun(g, ci)];
-    },
-  },
-];
-
-function nounSlot(noun: Noun, ci: CaseIndex): Slot {
-  return { label: 'Noun', options: noun.opts, answer: nounForm(noun, ci) };
-}
-
-function einSlot(noun: Noun, ci: CaseIndex): Slot {
-  const stem = pick(noun.g === 'p' ? EIN_WORDS_PL : EIN_WORDS_SG);
-  return {
-    label: 'Article',
-    options: ENDING_OPTIONS.map(e => stem + e),
-    answer: stem + EIN_ENDING[noun.g][ci],
-  };
-}
-
-function adjSlot(adj: string, ending: string): Slot {
-  return { label: 'Adjective', options: ENDING_OPTIONS.map(e => adj + e), answer: adj + ending };
-}
-
-// The example nouns of the summary tables: Mann, Kind, Frau, Leute
-const SAMPLE_NOUN = Object.fromEntries(NOUN_POOLS.core.nouns.map(n => [n.g, n])) as Record<Gender, Noun>;
-
-// der / den / dem ... with everything after the d as the ending
-function defWord(g: Gender, ci: CaseIndex): Word {
-  return ['d', DEF_ARTICLE[g][ci].slice(1)];
-}
-
-function sampleNoun(g: Gender, ci: CaseIndex): Word {
-  const noun = SAMPLE_NOUN[g];
-  return [noun.w, nounForm(noun, ci).slice(noun.w.length)];
-}
-
-// ---------- Persistence ----------
-
-const STORE_KEY = 'declination-trainer-v1';
-
-function defaultState(): State {
-  return {
-    settings: { exercises: ['def'], pools: ['core'], genders: [...GENDERS], cases: CASES.map(c => c.id) },
-    stats: { shown: 0, perfect: 0, streak: 0, byExercise: {} },
-  };
-}
-
-function loadState(): State {
-  try {
-    const saved = JSON.parse(localStorage.getItem(STORE_KEY) ?? 'null');
-    if (saved && saved.settings && saved.stats) {
-      // Settings saved before the gender filter existed: allow all genders
-      saved.settings.genders ??= [...GENDERS];
-      return saved;
-    }
-  } catch { /* ignore corrupt or blocked storage */ }
-  return defaultState();
-}
-
-function saveState() {
-  try {
-    localStorage.setItem(STORE_KEY, JSON.stringify(state));
-  } catch { /* storage unavailable: stats live for this session only */ }
-}
+import { EXERCISES, type Exercise } from './core/exercises.ts'
+import { CASES, GENDER_HEADER, GENDER_LABEL, GENDERS, type CaseIndex, type Gender } from './core/grammar.ts'
+import { clearHistory, recordResult, type DayCounts } from './core/history.ts'
+import { NOUN_POOLS } from './core/nouns.ts'
+import { answer, createQuestion, type Question } from './core/question.ts'
+import { settingsProblem } from './core/settings.ts'
+import { emptyStats, exerciseCounts, pct, withFinished, withShown, withStreakBroken } from './core/stats.ts'
+import { applyTheme, loadState, loadTheme, saveState as storeState, saveTheme, saveView, type Theme } from './core/storage.ts'
 
 const state = loadState();
 
-// ---------- Helpers ----------
-
-function pick<T>(arr: readonly T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
+function saveState() {
+  storeState(state);
 }
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -337,29 +63,12 @@ function renderSettings() {
   });
 }
 
-// Nouns from the selected groups that have one of the selected genders
-function availableNouns(): Noun[] {
-  const s = state.settings;
-  return s.pools.flatMap(p => NOUN_POOLS[p].nouns).filter(n => s.genders.includes(n.g));
-}
-
-// Why no question can be drawn with the current settings, or null if one can
-function settingsProblem(): string | null {
-  const s = state.settings;
-  if (!s.exercises.length) return 'Select at least one exercise.';
-  if (!s.pools.length) return 'Select at least one noun group.';
-  if (!s.genders.length) return 'Select at least one gender or Plural.';
-  if (!s.cases.length) return 'Select at least one case.';
-  if (!availableNouns().length) return 'The selected noun groups have no nouns of the selected genders (the n-nouns are all masculine).';
-  return null;
-}
-
 function settingsValid() {
-  return settingsProblem() === null;
+  return settingsProblem(state.settings) === null;
 }
 
 function showSettingsProblem() {
-  const problem = settingsProblem();
+  const problem = settingsProblem(state.settings);
   const el = $('settings-error');
   el.textContent = problem ?? '';
   el.hidden = problem === null;
@@ -375,14 +84,6 @@ function settingsChanged() {
 
 // ---------- Stats ----------
 
-function exStats(id: string): Counts {
-  return (state.stats.byExercise[id] ||= { shown: 0, perfect: 0 });
-}
-
-function pct(perfect: number, shown: number): string {
-  return shown ? Math.round((perfect / shown) * 100) + '%' : '–';
-}
-
 function renderStats() {
   const st = state.stats;
   $('stat-shown').textContent = String(st.shown);
@@ -396,7 +97,7 @@ function renderStats() {
   if (!body) return;
   body.innerHTML = '';
   for (const ex of EXERCISES) {
-    const e = st.byExercise[ex.id] || { shown: 0, perfect: 0 };
+    const e = exerciseCounts(st, ex.id);
     const tr = document.createElement('tr');
     for (const v of [ex.name, e.shown, e.perfect, e.shown - e.perfect, pct(e.perfect, e.shown)]) {
       const td = document.createElement('td');
@@ -408,8 +109,6 @@ function renderStats() {
 }
 
 // ---------- Summary tables ----------
-
-const GENDER_HEADER: Record<Gender, string> = { m: 'Maskulin', n: 'Neutrum', f: 'Feminin', p: 'Plural' };
 
 // One table per selected exercise, like the ones in "German Declination.md".
 // Endings take the colour of their gender; the headers use the gender and case colours.
@@ -502,7 +201,6 @@ function spanRows(el: HTMLTableCellElement, rows: number): HTMLTableCellElement 
 // ---------- Questions ----------
 
 let current: Question | null = null;
-let lastKey = '';
 
 // Pending move to the next question after a solved one
 let advanceTimer: number | undefined;
@@ -511,33 +209,9 @@ const ADVANCE_DELAY_MS = 1000;
 function newQuestion() {
   clearTimeout(advanceTimer);
   showSettingsProblem();
-  const valid = settingsValid();
-  $('card').hidden = !valid;
-  if (!valid) { current = null; return; }
-
-  const s = state.settings;
-  const nouns = availableNouns();
-  let exercise: Exercise, noun: Noun, ci: CaseIndex, adj: string, key: string;
-  let tries = 0;
-  do {
-    exercise = pick(EXERCISES.filter(e => s.exercises.includes(e.id)));
-    noun = pick(nouns);
-    const caseId = pick(s.cases);
-    ci = CASES.findIndex(c => c.id === caseId) as CaseIndex;
-    adj = pick(ADJECTIVES);
-    key = `${exercise.id}|${noun.w}|${ci}`;
-  } while (key === lastKey && ++tries < 20);
-  lastKey = key;
-
-  current = {
-    exercise, noun, ci,
-    adj: exercise.adjective ? adj : null,
-    slots: exercise.build(noun, ci, adj).map(sl => ({ ...sl, solved: false })),
-    mistakes: 0,
-    touched: false,
-    finished: false,
-  };
-  renderQuestion();
+  current = createQuestion(state.settings, current?.key);
+  $('card').hidden = !current;
+  if (current) renderQuestion();
 }
 
 function renderQuestion() {
@@ -555,7 +229,7 @@ function renderQuestion() {
 
   const slotsBox = $('slots');
   slotsBox.innerHTML = '';
-  q.slots.forEach(slot => {
+  q.slots.forEach((slot, slotIndex) => {
     const wrap = document.createElement('div');
     wrap.className = 'slot';
     const label = document.createElement('div');
@@ -566,7 +240,7 @@ function renderQuestion() {
     for (const opt of slot.options) {
       const btn = document.createElement('button');
       btn.textContent = opt;
-      btn.addEventListener('click', () => choose(slot, opt, btn, options));
+      btn.addEventListener('click', () => choose(slotIndex, opt, btn, options));
       options.append(btn);
     }
     wrap.append(label, options);
@@ -589,31 +263,31 @@ function renderPhrase() {
   }
 }
 
-function choose(slot: Question['slots'][number], opt: string, btn: HTMLButtonElement, optionsBox: HTMLElement) {
-  if (!current || slot.solved || current.finished) return;
+function choose(slotIndex: number, opt: string, btn: HTMLButtonElement, optionsBox: HTMLElement) {
+  if (!current) return;
+  const outcome = answer(current, slotIndex, opt);
+  if (outcome.result === 'ignored') return;
+  const q = current = outcome.question;
+
   // A question counts as shown once the user starts answering it,
   // so reloading the page or changing settings doesn't inflate the count
-  if (!current.touched) {
-    current.touched = true;
-    state.stats.shown++;
-    exStats(current.exercise.id).shown++;
+  if (outcome.started) {
+    state.stats = withShown(state.stats, q.exercise.id);
     saveState();
     renderStats();
-    record(current, { shown: 1 });
+    record(q, { shown: 1 });
   }
 
-  if (opt === slot.answer) {
+  if (outcome.result === 'correct') {
     btn.classList.add('correct');
-    slot.solved = true;
     optionsBox.classList.add('done');
     for (const b of optionsBox.querySelectorAll('button')) b.disabled = true;
     renderPhrase();
-    if (current.slots.every(s => s.solved)) finish(current);
-  } else if (!btn.classList.contains('wrong')) {
+    if (outcome.finished) finish(q);
+  } else {
     btn.classList.add('wrong');
     btn.disabled = true;
-    current.mistakes++;
-    record(current, { mistakes: 1 });
+    record(q, { mistakes: 1 });
   }
 }
 
@@ -623,17 +297,9 @@ function record(q: Question, delta: Partial<DayCounts>) {
 }
 
 function finish(q: Question) {
-  q.finished = true;
-  const st = state.stats;
   const perfect = q.mistakes === 0;
-  if (perfect) {
-    st.perfect++;
-    st.streak++;
-    exStats(q.exercise.id).perfect++;
-    record(q, { perfect: 1 });
-  } else {
-    st.streak = 0;
-  }
+  state.stats = withFinished(state.stats, q.exercise.id, perfect);
+  if (perfect) record(q, { perfect: 1 });
   saveState();
   renderStats();
 
@@ -706,7 +372,7 @@ $('next').addEventListener('click', newQuestion);
 
 $('skip').addEventListener('click', () => {
   if (current && current.touched && !current.finished) {
-    state.stats.streak = 0;
+    state.stats = withStreakBroken(state.stats);
     saveState();
     renderStats();
   }
@@ -715,7 +381,7 @@ $('skip').addEventListener('click', () => {
 
 $('reset').addEventListener('click', () => {
   if (!confirm('Reset the current statistics?\n\nYour daily history is kept. To delete it, use Settings → Clear history.')) return;
-  state.stats = defaultState().stats;
+  state.stats = emptyStats();
   saveState();
   renderStats();
   newQuestion();
@@ -745,42 +411,19 @@ $('clear-history').addEventListener('click', async () => {
   }
 });
 
-// Theme: 'system' follows the device's light/dark setting; 'light' and 'dark'
-// override it. The script in each page's <head> applies the stored choice
-// before the first paint.
-const THEME_KEY = 'declination-theme';
-
-function storedTheme(): string {
-  try {
-    return localStorage.getItem(THEME_KEY) ?? 'system';
-  } catch {
-    return 'system';
-  }
-}
-
-function applyTheme(theme: string) {
-  if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
-  else delete document.documentElement.dataset.theme;
-}
-
+// Theme: the script in each page's <head> applies the stored choice before the first paint
 for (const radio of document.querySelectorAll<HTMLInputElement>('#theme-choice input')) {
-  radio.checked = radio.value === storedTheme();
+  radio.checked = radio.value === loadTheme();
   radio.addEventListener('change', () => {
-    applyTheme(radio.value);
-    try {
-      localStorage.setItem(THEME_KEY, radio.value);
-    } catch { /* storage unavailable: theme lasts for this visit only */ }
+    applyTheme(radio.value as Theme);
+    saveTheme(radio.value as Theme);
   });
 }
 
 // Link to the other version of the page; remember the choice so that
 // index.html's redirect respects it (see the script in its <head>)
 const switchView = document.getElementById('switch-view');
-switchView?.addEventListener('click', () => {
-  try {
-    localStorage.setItem('declination-view', switchView.dataset.view!);
-  } catch { /* storage unavailable: the link still works for this visit */ }
-});
+switchView?.addEventListener('click', () => saveView(switchView.dataset.view!));
 
 document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && !settingsDialog.open && !tablesDialog.open && current && current.finished && document.activeElement !== $('next')) {

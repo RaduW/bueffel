@@ -1,11 +1,11 @@
 // Long-term per-day results in IndexedDB.
 //
-// The numbers shown in the app come from localStorage (see app.ts); this is a
+// The numbers shown in the app come from localStorage (see storage.ts); this is a
 // separate, permanent log that "Reset statistics" does not touch; only
 // Settings → Clear history deletes it. Nothing reads it yet, it's kept for
 // showing progress over time later.
 //
-// Database "declination-history", object store "days", one record per local
+// Database "bueffel-history", object store "days", one record per local
 // calendar day, keyed by date:
 //
 //   {
@@ -20,7 +20,7 @@
 // perfect  = questions solved without a wrong click
 // mistakes = wrong clicks
 
-const DB_NAME = 'declination-history';
+const DB_NAME = 'bueffel-history';
 const DB_VERSION = 1;
 const STORE = 'days';
 
