@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Alternative icon (not used yet): a bison head, front view, on the German flag -->
+  <rect width="512" height="171" fill="#000"/>
+  <rect y="171" width="512" height="170" fill="#dd0000"/>
+  <rect y="341" width="512" height="171" fill="#ffce00"/>
+  <g fill="#fff" stroke="#1a1a1a" stroke-width="7" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M178 196 C130 190 90 168 62 100 C54 152 76 204 118 228 C140 240 160 244 180 242 Z"/>
+    <path d="M334 196 C382 190 422 168 450 100 C458 152 436 204 394 228 C372 240 352 244 332 242 Z"/>
+    <path d="M160 256 C132 268 106 266 90 252 C110 236 138 236 166 242 Z"/>
+    <path d="M352 256 C380 268 406 266 422 252 C402 236 374 236 346 242 Z"/>
+    <path d="M150 214
+      C138 172 168 140 196 148
+      C206 120 240 112 256 130
+      C272 112 306 120 316 148
+      C344 140 374 172 362 214
+      C372 252 356 292 342 330
+      C332 372 314 424 256 428
+      C198 424 180 372 170 330
+      C156 292 140 252 150 214 Z"/>
+    <path d="M204 364 C204 342 228 334 256 334 C284 334 308 342 308 364 C308 400 290 424 256 424 C222 424 204 400 204 364 Z"/>
+    <path d="M178 254 C192 246 210 246 224 256" fill="none" stroke-width="6"/>
+    <path d="M334 254 C320 246 302 246 288 256" fill="none" stroke-width="6"/>
+  </g>
+  <g fill="#1a1a1a">
+    <circle cx="202" cy="276" r="10"/>
+    <circle cx="310" cy="276" r="10"/>
+    <ellipse cx="236" cy="374" rx="9" ry="13" transform="rotate(-18 236 374)"/>
+    <ellipse cx="276" cy="374" rx="9" ry="13" transform="rotate(18 276 374)"/>
+  </g>
+</svg>

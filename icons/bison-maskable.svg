@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Maskable variant: the bison scaled into the central safe zone (80% circle) -->
+  <rect width="512" height="171" fill="#000"/>
+  <rect y="171" width="512" height="170" fill="#dd0000"/>
+  <rect y="341" width="512" height="171" fill="#ffce00"/>
+  <g transform="translate(256 262) scale(0.74) translate(-265 -266)">
+  <g fill="#fff" stroke="#1a1a1a" stroke-width="7" stroke-linejoin="round">
+    <path d="M70 348
+      C62 322 66 290 86 266
+      C96 250 108 240 122 234
+      C138 180 160 128 206 112
+      C246 100 280 126 310 150
+      C348 172 400 186 430 204
+      C446 214 454 232 454 250
+      L468 316 L458 320 L448 280
+      C446 300 442 316 436 326
+      L438 420 L416 420 L410 352
+      L398 352 L394 420 L372 420 L366 338
+      C330 346 294 348 262 344
+      L252 420 L224 420 L220 368
+      L206 368 L200 420 L172 420 L168 370
+      C154 382 138 398 120 410
+      C116 394 113 380 110 368
+      C100 364 84 360 70 348 Z"/>
+    <path d="M112 244 C96 230 92 210 102 192 C106 210 116 224 132 232 Z"/>
+  </g>
+  <circle cx="96" cy="278" r="7" fill="#1a1a1a"/>
+  </g>
+</svg>

@@ -4,7 +4,7 @@ A small browser app for practising German declination: articles, _ein/kein_ word
 
 ## How to run it
 
-The project uses [Vite](https://vite.dev/) with TypeScript. You need [Node.js](https://nodejs.org/) and npm.
+The project uses [Vite](https://vite.dev/) with TypeScript and React. You need [Node.js](https://nodejs.org/) and npm.
 
 Install dependencies (once):
 
@@ -98,17 +98,17 @@ A question only counts once you click your first answer, so reloading the page d
 
 Statistics and settings are saved in the browser's `localStorage`, so they persist between visits:
 
-- `declination-trainer-v1`: statistics and the exercise, noun, gender and case selections
-- `declination-theme`: the theme (`system`, `light` or `dark`)
-- `declination-view`: the desktop/phone choice, once you've used the switch link
+- `bueffel-state-v1`: statistics and the exercise, noun, gender and case selections
+- `bueffel-theme`: the theme (`system`, `light` or `dark`)
+- `bueffel-view`: the desktop/phone choice, once you've used the switch link
 
 **Reset statistics** clears these statistics but keeps your settings and the daily history below.
 
 ### Daily history (IndexedDB)
 
-The app also keeps a permanent log with one record per calendar day, in the browser's IndexedDB (database `declination-history`, store `days`). It isn't shown in the app yet. Each day records questions started (`shown`), questions solved without a mistake (`perfect`) and wrong clicks (`mistakes`). These are kept as a total and broken down by exercise, case and gender. **Reset statistics** does not clear this history; to delete it, use **Settings → Clear history**.
+The app also keeps a permanent log with one record per calendar day, in the browser's IndexedDB (database `bueffel-history`, store `days`). It isn't shown in the app yet. Each day records questions started (`shown`), questions solved without a mistake (`perfect`) and wrong clicks (`mistakes`). These are kept as a total and broken down by exercise, case and gender. **Reset statistics** does not clear this history; to delete it, use **Settings → Clear history**.
 
-To look at it, open the browser's developer tools: **Application → IndexedDB → declination-history → days** in Chrome or Edge, or **Storage → Indexed DB** in Firefox and Safari. The app also asks the browser to keep its storage permanently; Firefox may show a prompt for this.
+To look at it, open the browser's developer tools: **Application → IndexedDB → bueffel-history → days** in Chrome or Edge, or **Storage → Indexed DB** in Firefox and Safari. The app also asks the browser to keep its storage permanently; Firefox may show a prompt for this.
 
 ## Files
 
@@ -116,16 +116,18 @@ To look at it, open the browser's developer tools: **Application → IndexedDB �
 |---|---|
 | `index.html` | Desktop page (Vite entry point); sends phones to `mobile.html` |
 | `mobile.html` | Phone page (Vite entry point) |
-| `src/app.ts` | Shared logic: declination tables, nouns, questions, statistics |
-| `src/history.ts` | Daily history in IndexedDB |
-| `src/main.ts` | Desktop page entry: loads the styles and `app.ts` |
-| `src/mobile.ts` | Phone page entry: loads the styles, phone overrides and `app.ts` |
+| `src/core/` | Logic without UI: declension tables, nouns, exercises, questions, statistics, settings, storage |
+| `src/core/history.ts` | Daily history in IndexedDB |
+| `src/ui/` | React components; `App.tsx` holds the state and lays out the page |
+| `src/main.tsx` | Desktop page entry: loads the styles and renders `App` |
+| `src/mobile.tsx` | Phone page entry: loads the styles, phone overrides and renders `App` |
 | `src/style.css` | Shared styling (light and dark mode) |
 | `src/mobile.css` | Phone layout overrides |
 | `public/favicon.svg` | Browser tab icon |
 | `public/*.png` | App icons for installing the PWA (Android, iOS, desktop) |
+| `icons/` | Icon sources (SVG): `bison.svg` (the app icon), its maskable variant, and `bison-head.svg`, an alternative not used yet. `icons/build.sh` regenerates the icons in `public/` (needs `rsvg-convert`) |
 | `vite.config.ts` | Vite config: relative `base` (so the build works on GitHub Pages), the two pages, and the PWA manifest and service worker (via `vite-plugin-pwa`) |
 | `.github/workflows/deploy.yml` | Builds and deploys to GitHub Pages on every push to `main` |
 | `German Declination.md` | The grammar reference the exercises are based on |
 
-To add nouns or adjectives, edit `NOUN_POOLS` or `ADJECTIVES` in `src/app.ts`. Each noun lists the forms offered as choices in `opts`, and that list must include every correct form of the noun.
+To add nouns or adjectives, edit `NOUN_POOLS` in `src/core/nouns.ts` or `ADJECTIVES` in `src/core/grammar.ts`. Each noun lists the forms offered as choices in `opts`, and that list must include every correct form of the noun.

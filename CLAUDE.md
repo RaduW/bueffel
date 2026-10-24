@@ -17,12 +17,18 @@ exercise types are coming.
    exercises, question drawing/answering, stats, settings, storage, history).
    Functions there return new objects instead of mutating, so they can back
    React state (`useState`/`useReducer`) directly.
-2. **Next:** rebuild the UI in React, one component per exercise, reusing the
-   shared pieces (option buttons, result banner, stats, settings and tables dialogs).
-3. Merge `index.html` and `mobile.html` into one responsive app (CSS / media
+2. **Done:** UI rebuilt in React (`src/ui/`). Both pages mount the same `App`
+   with `variant="desktop"` or `"mobile"`; the markup and CSS class names are
+   the same as before, so `style.css` / `mobile.css` are unchanged.
+3. **Next:** merge `index.html` and `mobile.html` into one responsive app (CSS / media
    queries) instead of two pages kept in sync.
 
-Until step 2, `src/app.ts` is the old DOM layer, now running on `src/core`.
+Exercise-specific components can come once there is a second kind of exercise;
+today every exercise is "fill the slots by choosing options" (`QuestionCard`).
+
+`@vitejs/plugin-react` was installed with `--legacy-peer-deps` (an optional Babel
+peer conflicts with workbox's Babel). `npm ci` works without the flag; a later
+`npm install <pkg>` may need it again.
 
 ## Layout
 
@@ -31,7 +37,17 @@ Until step 2, `src/app.ts` is the old DOM layer, now running on `src/core`.
 - `src/core/exercises.ts`: exercise definitions (`build` slots, `sample` table cells)
 - `src/core/question.ts`: `createQuestion`, `answer`
 - `src/core/stats.ts`, `settings.ts`, `storage.ts`, `history.ts` (IndexedDB daily log)
-- `src/app.ts`: DOM UI shared by `index.html` (desktop) and `mobile.html` (phone)
+- `src/ui/App.tsx`: state (settings, stats, question), auto-advance, layout per variant
+- `src/ui/`: `Header`, `QuestionCard`, `ResultBanner`, `Breakdown` (desktop),
+  `SettingsDialog`, `TablesDialog`, `Modal` (native `<dialog>`), `useMediaQuery`, `icons`
+- `src/main.tsx` / `src/mobile.tsx`: entries for `index.html` / `mobile.html`
+
+## Icon
+
+A white bison on the German flag. Sources in `icons/` (`bison.svg`,
+`bison-maskable.svg`); `icons/build.sh` writes favicon and PWA icons to `public/`.
+`icons/bison-head.svg` is an alternative (front view of the head) the user wants
+kept, but not used.
 
 ## Behaviour to keep
 
