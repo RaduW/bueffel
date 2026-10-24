@@ -39,9 +39,19 @@ peer conflicts with workbox's Babel). `npm ci` works without the flag; a later
 - `src/core/exercises.ts`: exercise definitions (`build` slots, `sample` table cells)
 - `src/core/question.ts`: `createQuestion`, `answer`
 - `src/core/stats.ts`, `settings.ts`, `storage.ts`, `history.ts` (IndexedDB daily log)
-- `src/ui/App.tsx`: state (settings, stats, question), auto-advance, wide or compact layout
-- `src/ui/`: `Header`, `QuestionCard`, `ResultBanner`, `Breakdown` (wide layout),
-  `SettingsDialog`, `TablesDialog`, `Modal` (native `<dialog>`), `useMediaQuery`, `icons`
+- `src/ui/App.tsx`: picks the page from the URL hash (`useHashRoute`): `#/<route>`
+  of an exercise, otherwise the home page (`Home.tsx`)
+- `src/ui/exercises.ts`: the exercises on the home page (route, title, component).
+  Home: icon + "Büffel" header, a tagline, one card per exercise showing only its
+  title (no description or progress on the card; user's choice).
+  A new exercise = a new entry here plus its folder
+- `src/ui/`: shared `Header` (title, optional back button, actions), `Modal`
+  (native `<dialog>`), `useMediaQuery`, `icons`
+- `src/ui/declension/Declension.tsx`: the declension exercise: state (settings,
+  stats, question), auto-advance, wide or compact layout; `onFinish` goes home
+  (a started, unfinished question counts like Skip)
+- `src/ui/declension/`: `QuestionCard`, `ResultBanner`, `Breakdown` (wide layout),
+  `SettingsDialog`, `TablesDialog`
 - `src/main.tsx`: entry for `index.html`
 
 ## Icon

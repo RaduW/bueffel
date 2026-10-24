@@ -28,3 +28,12 @@ export function SettingsIcon({ size }: { size: number }) {
     </Icon>
   );
 }
+
+export function BackIcon({ size }: { size: number }) {
+  return (
+    <Icon size={size}>
+      <line x1="19" y1="12" x2="5" y2="12" />
+      <polyline points="12 19 5 12 12 5" />
+    </Icon>
+  );
+}

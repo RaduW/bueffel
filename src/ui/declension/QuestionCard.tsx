@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
-import { CASES, GENDER_LABEL } from '../core/grammar.ts'
-import type { Question, SlotState } from '../core/question.ts'
+import { CASES, GENDER_LABEL } from '../../core/grammar.ts'
+import type { Question, SlotState } from '../../core/question.ts'
 
 interface Props {
   question: Question

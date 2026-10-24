@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
-import { EXERCISES } from '../core/exercises.ts'
-import { CASES, GENDER_LABEL, GENDERS } from '../core/grammar.ts'
-import { NOUN_POOLS } from '../core/nouns.ts'
-import type { Settings } from '../core/settings.ts'
-import { applyTheme, loadTheme, saveTheme, type Theme } from '../core/storage.ts'
-import { Modal } from './Modal.tsx'
+import { EXERCISES } from '../../core/exercises.ts'
+import { CASES, GENDER_LABEL, GENDERS } from '../../core/grammar.ts'
+import { NOUN_POOLS } from '../../core/nouns.ts'
+import type { Settings } from '../../core/settings.ts'
+import { applyTheme, loadTheme, saveTheme, type Theme } from '../../core/storage.ts'
+import { Modal } from '../Modal.tsx'
 
 interface Props {
   open: boolean

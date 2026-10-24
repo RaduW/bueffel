@@ -64,6 +64,10 @@ The service worker only runs in production builds (`npm run build` / `npm run pr
 
 ## How to use it
 
+The start page lists the exercises as cards; for now there's one, **Declination practice**. Click it to open it. The back arrow next to the exercise's title finishes it and returns to the start page; leaving a question you've already started counts like **Skip**. Each page has its own address (`#/declension` for Deklination), so the browser's Back button and bookmarks work.
+
+**Deklination**
+
 1. Click the gear icon next to the title to open **Settings**, and choose:
    - **Exercises:** one or more of
      - definite article + noun (_der Mann_)
@@ -119,7 +123,8 @@ To look at it, open the browser's developer tools: **Application â†’ IndexedDB â
 | `index.html` | The page (Vite entry point) |
 | `src/core/` | Logic without UI: declension tables, nouns, exercises, questions, statistics, settings, storage |
 | `src/core/history.ts` | Daily history in IndexedDB |
-| `src/ui/` | React components; `App.tsx` holds the state and lays out the page |
+| `src/ui/` | Shared React components: `App.tsx` (shows the start page or an exercise, by URL hash), `Home.tsx` (start page: one card per exercise), `exercises.ts` (the list of exercises), `Header`, `Modal` |
+| `src/ui/declension/` | The Deklination exercise; `Declension.tsx` holds its state and lays out the page |
 | `src/main.tsx` | Entry: loads the styles and renders `App` |
 | `src/style.css` | Styling (light and dark mode); the compact layout's rules are at the end, under `.compact` |
 | `public/favicon.svg` | Browser tab icon |

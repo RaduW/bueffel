@@ -287,6 +287,26 @@ dialog.tables-dialog { width: min(840px, calc(100vw - 32px)); }
   .given { font-size: 1.3rem; }
 }
 
+/* Home page: one card per exercise */
+h1:has(.logo) { display: flex; align-items: center; gap: 10px; }
+.logo { width: 1.4em; height: 1.4em; border-radius: 22%; }
+.tagline { color: var(--muted); margin: 0 0 16px; }
+.exercise-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.exercise-card {
+  display: block;
+  padding: 20px 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  color: inherit;
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: border-color 0.12s;
+}
+.exercise-card:hover, .exercise-card:focus-visible { border-color: var(--accent); }
+.exercise-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
 /* ---------- Compact layout (phones, narrow windows) ----------
    App adds the .compact class; these rules override the ones above. */
 

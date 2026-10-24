@@ -1,5 +1,5 @@
-import { EXERCISES } from '../core/exercises.ts'
-import { exerciseCounts, pct, type Stats } from '../core/stats.ts'
+import { EXERCISES } from '../../core/exercises.ts'
+import { exerciseCounts, pct, type Stats } from '../../core/stats.ts'
 
 interface Props {
   stats: Stats

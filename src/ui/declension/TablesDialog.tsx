@@ -1,7 +1,7 @@
-import { exerciseById, type Exercise } from '../core/exercises.ts'
-import { CASES, GENDER_HEADER, GENDERS, type CaseIndex, type Gender } from '../core/grammar.ts'
-import { Modal } from './Modal.tsx'
-import { useMediaQuery } from './useMediaQuery.ts'
+import { exerciseById, type Exercise } from '../../core/exercises.ts'
+import { CASES, GENDER_HEADER, GENDERS, type CaseIndex, type Gender } from '../../core/grammar.ts'
+import { Modal } from '../Modal.tsx'
+import { useMediaQuery } from '../useMediaQuery.ts'
 
 interface Props {
   open: boolean

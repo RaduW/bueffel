@@ -1,32 +1,31 @@
-import { pct, type Stats } from '../core/stats.ts'
-import { HelpIcon, SettingsIcon } from './icons.tsx'
+import type { ReactNode } from 'react'
+import { BackIcon } from './icons.tsx'
 
 interface Props {
-  stats: Stats
+  title: ReactNode
   iconSize: number
-  onOpenTables: () => void
-  onOpenSettings: () => void
+  // Shows a back button before the title
+  onBack?: () => void
+  backLabel?: string
+  // Icon buttons after the title
+  actions?: ReactNode
+  // Below the title row in the compact layout, beside it in the wide one
+  children?: ReactNode
 }
 
-export function Header({ stats, iconSize, onOpenTables, onOpenSettings }: Props) {
+export function Header({ title, iconSize, onBack, backLabel = 'Back', actions, children }: Props) {
   return (
     <header>
       <div className="title">
-        <h1>Büffel</h1>
-        <button className="icon-button" title="Declension tables" aria-label="Declension tables" onClick={onOpenTables}>
-          <HelpIcon size={iconSize} />
-        </button>
-        <button className="icon-button" title="Settings" aria-label="Settings" onClick={onOpenSettings}>
-          <SettingsIcon size={iconSize} />
-        </button>
+        {onBack && (
+          <button className="icon-button back" title={backLabel} aria-label={backLabel} onClick={onBack}>
+            <BackIcon size={iconSize} />
+          </button>
+        )}
+        <h1>{title}</h1>
+        {actions}
       </div>
-      <div className="stats">
-        <div><span id="stat-shown">{stats.shown}</span><small>shown</small></div>
-        <div><span id="stat-perfect">{stats.perfect}</span><small>success</small></div>
-        <div><span id="stat-errors">{stats.shown - stats.perfect}</span><small>errors</small></div>
-        <div><span id="stat-rate">{pct(stats.perfect, stats.shown)}</span><small>accuracy</small></div>
-        <div><span id="stat-streak">{stats.streak}</span><small>streak</small></div>
-      </div>
+      {children}
     </header>
   );
 }
