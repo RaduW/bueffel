@@ -3,7 +3,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
   // Relative asset paths, so the build works under any sub-path
-  // (e.g. GitHub Pages serves it from /declination-practice/)
+  // (e.g. GitHub Pages serves it from /bueffel/)
   base: './',
   build: {
     // Two pages: desktop (index.html) and phone (mobile.html)
@@ -17,9 +17,13 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       manifest: {
-        name: 'Deklination üben',
-        short_name: 'Deklination',
-        description: 'Practise German declination: articles, adjective endings and noun endings.',
+        // Fixed identity: without it the browser identifies the app by its
+        // start_url, so an older app installed from the same address (e.g. the
+        // Deklination app on localhost) blocks installing this one
+        id: 'bueffel',
+        name: 'Bueffel',
+        short_name: 'Bueffel',
+        description: 'Practise German: declension of articles, adjectives and nouns, and more to come.',
         lang: 'de',
         start_url: './',
         scope: './',

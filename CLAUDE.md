@@ -1,4 +1,4 @@
-# Büffel
+# Bueffel
 
 A browser app (PWA) for practising German. It started as a declension trainer
 (`~/dev/declination`, published at https://raduw.github.io/declination-practice/,
@@ -6,8 +6,7 @@ left as is) and is growing into a collection of German exercises.
 
 ## Name
 
-- Display name: **Büffel** (from *büffeln*, "to cram").
-- Wherever it must be typed (repo, package, URLs, storage keys): `bueffel`.
+- Name: **Bueffel** everywhere (from *büffeln*, "to cram"), written without the umlaut so it is easy to type on any keyboard.
 
 ## Plan: move to React
 
