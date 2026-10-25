@@ -64,7 +64,7 @@ The service worker only runs in production builds (`npm run build` / `npm run pr
 
 ## How to use it
 
-The start page lists the exercises as cards; for now there's one, **Declination practice**. Click it to open it. The back arrow next to the exercise's title finishes it and returns to the start page; leaving a question you've already started counts like **Skip**. Each page has its own address (`#/declension` for Deklination), so the browser's Back button and bookmarks work.
+The start page lists the exercises as cards: **Declination practice** and **Declension in sentences**. Click one to open it. The back arrow next to the exercise's title finishes it and returns to the start page; leaving a question you've already started counts like **Skip**. Each page has its own address (`#/declension`, `#/sentences`), so the browser's Back button and bookmarks work.
 
 **Deklination**
 
@@ -88,6 +88,12 @@ The start page lists the exercises as cards; for now there's one, **Declination 
 4. When every word is solved, click **Next** or press **Enter**.
 
 **Skip** moves to a new question. Skipping a question you've already started resets your streak.
+
+**Declension in sentences**
+
+A whole sentence is completed one word at a time, e.g. *D__ alt__ Mann__ (m) sieht d__ klein__ Hund__ (m).* Each noun's gender is given in grey brackets after it: (m), (n), (f), or (p) for plural. The gap being filled is highlighted, and below the sentence are the options for that word only: wrong choices turn red, the right one fills the gap and the options move on to the next word. A sentence solved without mistakes moves on by itself; after a mistake it stays, with the case and gender (or Plural) of each noun phrase written in front of it (*(Nominativ Maskulin) Der alte Mann sieht (Akkusativ Plural) die kleinen Kinder.*), until you click **Next** or press **Enter**. The **?** button explains the exercise.
+
+The sentences come from `declination-exercises.md`: 44 sentences with one, two or three noun phrases, in all four cases, each noun phrase being definite article + adjective + noun. Nouns are matched to the sentence (only people buy or give, cats sit on furniture, and so on). Not included yet: n-nouns (*Student*, *Junge* …), sentences that need *ein/kein*, and sentences where the article would merge with the preposition (*beim*, *vom*, *im*). The header shows the same tally as in Declination practice (shown, success, errors, accuracy, streak), counting finished sentences: a sentence is a success when it had no mistakes. The **Results** table counts each noun phrase separately, by case and pattern; a phrase is a success when all its words were right at the first try. Skipped sentences don't count. The tally and these results aren't saved yet: they reset when you leave the exercise.
 
 ## Statistics
 
@@ -125,6 +131,9 @@ To look at it, open the browser's developer tools: **Application → IndexedDB �
 | `src/core/history.ts` | Daily history in IndexedDB |
 | `src/ui/` | Shared React components: `App.tsx` (shows the start page or an exercise, by URL hash), `Home.tsx` (start page: one card per exercise), `exercises.ts` (the list of exercises), `Header`, `Modal` |
 | `src/ui/declension/` | The Deklination exercise; `Declension.tsx` holds its state and lays out the page |
+| `src/core/gapfill/` | gapFill, a reusable kind of exercise (fill a sentence gap by gap from options): the exercise interface, the template parser, the progress and scoring logic |
+| `src/core/sentences/` | gapFill exercise definitions; `declensionSentences.ts` is "Declension in sentences" |
+| `src/ui/gapfill/` | The page for any gapFill exercise: sentence, options, help dialog, results |
 | `src/main.tsx` | Entry: loads the styles and renders `App` |
 | `src/style.css` | Styling (light and dark mode); the compact layout's rules are at the end, under `.compact` |
 | `public/favicon.svg` | Browser tab icon |

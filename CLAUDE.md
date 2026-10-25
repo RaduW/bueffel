@@ -45,7 +45,8 @@ peer conflicts with workbox's Babel). `npm ci` works without the flag; a later
   Home: icon + "Büffel" header, a tagline, one card per exercise showing only its
   title (no description or progress on the card; user's choice).
   A new exercise = a new entry here plus its folder
-- `src/ui/`: shared `Header` (title, optional back button, actions), `Modal`
+- `src/ui/`: shared `Header` (title, optional back button, actions), `StatsBar`
+  (the shown/success/errors/accuracy/streak tally, used by both exercises), `Modal`
   (native `<dialog>`), `useMediaQuery`, `icons`
 - `src/ui/declension/Declension.tsx`: the declension exercise: state (settings,
   stats, question), auto-advance, wide or compact layout; `onFinish` goes home
@@ -53,6 +54,39 @@ peer conflicts with workbox's Babel). `npm ci` works without the flag; a later
 - `src/ui/declension/`: `QuestionCard`, `ResultBanner`, `Breakdown` (wide layout),
   `SettingsDialog`, `TablesDialog`
 - `src/main.tsx`: entry for `index.html`
+
+## gapFill (reusable exercise kind)
+
+Fill a sentence one gap at a time, picking each word from options; one option
+row at a time. Built so the same page serves many exercises (declension, verbs …).
+
+- `src/core/gapfill/types.ts`: `GapFillExercise` { id, title, info (help text,
+  paragraphs split by blank lines), settings? (reserved, not defined yet),
+  next(settings, previous) -> task }. A task is plain data: `template`
+  ("{D__} {alt__} {Mann__} sieht …", gaps matched by position), `gaps`
+  ({answer, options, label?, note?}; note is always shown in grey brackets after
+  the gap, e.g. the noun's gender "m"), `scores` ({tags, gaps}: one group per noun phrase),
+  `explanations?` ({gap, text}: e.g. "Nominativ Maskulin", "Dativ Plural", shown in brackets
+  before that gap only after a task finished with mistakes).
+  Definitions know nothing about the UI and don't drive gap-to-gap progress.
+- `session.ts`: `startTask`, `pick`, `scoreResults` (a group succeeds when its
+  gaps had no wrong pick); `scoreboard.ts`: totals per tag combination.
+- `template.ts`: `parseTemplate`, `hintFor` (hint = common prefix of the options
+  + "__", so it never rules out an option: articles show "d__"), `capitalize`.
+- `src/core/sentences/declensionSentences.ts`: first definition: 44 sentence
+  frames from `declination-exercises.md`, def. article + adjective + noun. Nouns
+  carry tags (person, animal, place, furniture, surface, portable …) and each
+  frame's phrase asks for tags, so sentences make sense. No n-nouns yet (user:
+  add later as an option); frames needing ein/kein or contractions are left out.
+- `src/ui/gapfill/GapFillPage.tsx` (+ Sentence, OptionRow, HelpDialog, ScorePanel);
+  `gapFillPage(def)` makes the component for `src/ui/exercises.ts`.
+- Decided with the user: help only behind the ? button; skipped tasks are not
+  scored (and don't touch the header tally or streak); tally and scores are in
+  memory only for now (not saved); after a task with
+  mistakes there is no auto-advance (explanations shown, Next / Enter to go on).
+- Not yet: settings, saving scores, moving the old declension exercise onto
+  gapFill (it is untouched; `ResultBanner` is imported from it, and
+  `COMPACT_QUERY` exists in both `src/ui/layout.ts` and `Declension.tsx`).
 
 ## Icon
 

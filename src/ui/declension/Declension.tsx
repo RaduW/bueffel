@@ -10,7 +10,7 @@ import { CASES } from '../../core/grammar.ts'
 import { clearHistory, recordResult, type DayCounts } from '../../core/history.ts'
 import { answer, createQuestion, type Question } from '../../core/question.ts'
 import { settingsProblem, type Settings } from '../../core/settings.ts'
-import { emptyStats, pct, withFinished, withShown, withStreakBroken, type Stats } from '../../core/stats.ts'
+import { emptyStats, withFinished, withShown, withStreakBroken } from '../../core/stats.ts'
 import { loadState, saveState } from '../../core/storage.ts'
 import { Breakdown } from './Breakdown.tsx'
 import { Header } from '../Header.tsx'
@@ -19,6 +19,7 @@ import { ResultBanner } from './ResultBanner.tsx'
 import { SettingsDialog } from './SettingsDialog.tsx'
 import { TablesDialog } from './TablesDialog.tsx'
 import { HelpIcon, SettingsIcon } from '../icons.tsx'
+import { StatsBar } from '../StatsBar.tsx'
 import { useMediaQuery } from '../useMediaQuery.ts'
 
 // Phones in portrait, narrow windows, and phones in landscape (short and touch)
@@ -195,18 +196,6 @@ export function Declension({ onFinish }: { onFinish: () => void }) {
           {result || <button id="skip" onClick={skip}>Skip</button>}
         </nav>
       )}
-    </div>
-  );
-}
-
-function StatsBar({ stats }: { stats: Stats }) {
-  return (
-    <div className="stats">
-      <div><span id="stat-shown">{stats.shown}</span><small>shown</small></div>
-      <div><span id="stat-perfect">{stats.perfect}</span><small>success</small></div>
-      <div><span id="stat-errors">{stats.shown - stats.perfect}</span><small>errors</small></div>
-      <div><span id="stat-rate">{pct(stats.perfect, stats.shown)}</span><small>accuracy</small></div>
-      <div><span id="stat-streak">{stats.streak}</span><small>streak</small></div>
     </div>
   );
 }

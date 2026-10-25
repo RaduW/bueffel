@@ -307,6 +307,35 @@ h1:has(.logo) { display: flex; align-items: center; gap: 10px; }
 .exercise-card:hover, .exercise-card:focus-visible { border-color: var(--accent); }
 .exercise-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
+/* gapFill: the sentence with its gaps; the gap being filled is highlighted */
+.sentence {
+  text-align: center;
+  font-size: 1.5rem;
+  line-height: 2.2;
+  margin: 8px 0 20px;
+}
+.gap {
+  color: var(--muted);
+  border-bottom: 2px dashed var(--border);
+  border-radius: 4px;
+  padding: 0 3px;
+}
+.gap.current {
+  color: var(--text);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  border-bottom: 2px solid var(--accent);
+}
+.gap.solved { color: var(--ok); font-weight: 600; border-bottom-color: transparent; }
+.gap-note { color: var(--muted); font-size: 0.6em; white-space: nowrap; }
+.explanation { color: var(--accent); font-size: 0.6em; font-weight: 600; white-space: nowrap; }
+.card.gapfill .actions { margin-top: 20px; }
+.scores-scroll { overflow-x: auto; }
+.scores table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.scores th, .scores td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+.scores th { color: var(--muted); font-weight: 600; }
+.scores .num { text-align: right; font-variant-numeric: tabular-nums; }
+.help-text p { margin: 12px 0 0; }
+
 /* ---------- Compact layout (phones, narrow windows) ----------
    App adds the .compact class; these rules override the ones above. */
 
@@ -352,6 +381,10 @@ h1:has(.logo) { display: flex; align-items: center; gap: 10px; }
 .compact .exercise-name { font-size: 0.75rem; }
 .compact .given { font-size: 1.35rem; gap: 8px; margin-top: 8px; }
 .compact .phrase { font-size: 1.25rem; margin: 12px 0 4px; min-height: 1.9rem; }
+.compact .sentence { font-size: 1.3rem; margin: 0 0 8px; }
+.compact .scores { margin-top: 20px; }
+.compact .scores table { font-size: 0.8rem; }
+.compact .scores th, .compact .scores td { padding: 5px 4px; }
 
 .compact .slot { margin-top: 12px; }
 .compact .options {
