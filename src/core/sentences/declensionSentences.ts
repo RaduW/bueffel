@@ -3,7 +3,7 @@
 
 import type { Explanation, Gap, GapFillExercise, GapFillTask, ScoreGroup } from '../gapfill/types.ts'
 import { capitalize, hintFor } from '../gapfill/template.ts'
-import { ADJ_ENDING, CASES, caseIndex, DEF_ARTICLE, DEF_OPTIONS, ENDING_OPTIONS, GENDER_HEADER, type CaseId } from '../grammar.ts'
+import { ADJ_ENDING, CASES, caseIndex, DEF_ARTICLE, DEF_OPTIONS, ENDING_OPTIONS, GENDER_HEADER, type CaseId, type Gender } from '../grammar.ts'
 import { nounForm, type Noun } from '../nouns.ts'
 import { pick } from '../random.ts'
 
@@ -121,6 +121,10 @@ const FRAMES: Frame[] = [
 ];
 
 const PATTERN = 'def.Art+adj+noun';
+
+// Shown after each noun: ♂ maskulin, ♀ feminin, ⚲ neutrum, ⚤ Plural. U+FE0E asks
+// for the plain text symbol, not the coloured emoji some phones show for ♂ and ♀
+const GENDER_SIGN: Record<Gender, string> = { m: '♂\uFE0E', f: '♀\uFE0E', n: '⚲\uFE0E', p: '⚤\uFE0E' };
 const CASE_TAG: Record<CaseId, string> = { nom: 'Nom', akk: 'Akk', dat: 'Dat', gen: 'Gen' };
 
 // The gaps of one noun phrase: article, adjective, noun
@@ -132,7 +136,7 @@ function phraseGaps(noun: SentenceNoun, adj: string, caseId: CaseId, sentenceSta
     { label: 'Article', options: articles, answer: sentenceStart ? capitalize(article) : article },
     { label: 'Adjective', options: ENDING_OPTIONS.map(e => adj + e), answer: adj + ADJ_ENDING.weak[noun.g][ci] },
     // The gender is given: the exercise is about the endings, not about guessing it
-    { label: 'Noun', options: noun.opts, answer: nounForm(noun, ci), note: noun.g },
+    { label: 'Noun', options: noun.opts, answer: nounForm(noun, ci), note: GENDER_SIGN[noun.g] },
   ];
 }
 
@@ -170,7 +174,7 @@ function createTask(): GapFillTask {
 export const declensionSentences: GapFillExercise = {
   id: 'declension-sentences',
   title: 'Declension in sentences',
-  info: `Complete the sentence, one word at a time. Each gap shows the start of the word; choose the right ending from the options below the sentence. After each noun, its gender is given in brackets: (m) maskulin, (n) neutrum, (f) feminin, (p) Plural. A wrong choice turns red: try again until you find the right one. Then the options move on to the next word.
+  info: `Complete the sentence, one word at a time. Each gap shows the start of the word; choose the right ending from the options below the sentence. After each noun, its gender is given in brackets: ♂\uFE0E maskulin, ♀\uFE0E feminin, ⚲\uFE0E neutrum, ⚤\uFE0E Plural (male and female). A wrong choice turns red: try again until you find the right one. Then the options move on to the next word.
 
 The sentences have one, two or three noun phrases, in any of the four cases. Every noun phrase is made of a definite article, an adjective and a noun, for example: Der alte Mann sieht den kleinen Hund.
 

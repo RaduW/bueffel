@@ -65,7 +65,7 @@ row at a time. Built so the same page serves many exercises (declension, verbs �
   next(settings, previous) -> task }. A task is plain data: `template`
   ("{D__} {alt__} {Mann__} sieht …", gaps matched by position), `gaps`
   ({answer, options, label?, note?}; note is always shown in grey brackets after
-  the gap, e.g. the noun's gender "m"), `scores` ({tags, gaps}: one group per noun phrase),
+  the gap, e.g. the noun's gender sign ♂ ♀ ⚲ ⚤), `scores` ({tags, gaps}: one group per noun phrase),
   `explanations?` ({gap, text}: e.g. "Nominativ Maskulin", "Dativ Plural", shown in brackets
   before that gap only after a task finished with mistakes).
   Definitions know nothing about the UI and don't drive gap-to-gap progress.

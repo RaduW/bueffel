@@ -326,7 +326,7 @@ h1:has(.logo) { display: flex; align-items: center; gap: 10px; }
   border-bottom: 2px solid var(--accent);
 }
 .gap.solved { color: var(--ok); font-weight: 600; border-bottom-color: transparent; }
-.gap-note { color: var(--muted); font-size: 0.6em; white-space: nowrap; }
+.gap-note { color: var(--muted); font-size: 0.75em; white-space: nowrap; }
 .explanation { color: var(--accent); font-size: 0.6em; font-weight: 600; white-space: nowrap; }
 .card.gapfill .actions { margin-top: 20px; }
 .scores-scroll { overflow-x: auto; }
