@@ -1,11 +1,14 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import { version } from './package.json'
 
 export default defineConfig({
   // Relative asset paths, so the build works under any sub-path
   // (e.g. GitHub Pages serves it from /bueffel/)
   base: './',
+  // The version from package.json, shown in the About dialog
+  define: { __APP_VERSION__: JSON.stringify(version) },
   plugins: [
     react(),
     VitePWA({

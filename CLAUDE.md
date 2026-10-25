@@ -45,6 +45,8 @@ peer conflicts with workbox's Babel). `npm ci` works without the flag; a later
   Home: icon + "Büffel" header, a tagline, one card per exercise showing only its
   title (no description or progress on the card; user's choice).
   A new exercise = a new entry here plus its folder
+- `src/ui/AboutDialog.tsx`: opened by the icon + "Büffel" title on the home page;
+  the version comes from package.json (`__APP_VERSION__`, defined in vite.config.ts)
 - `src/ui/`: shared `Header` (title, optional back button, actions), `StatsBar`
   (the shown/success/errors/accuracy/streak tally, used by both exercises), `Modal`
   (native `<dialog>`), `useMediaQuery`, `icons`
@@ -74,7 +76,10 @@ row at a time. Built so the same page serves many exercises (declension, verbs �
 - `template.ts`: `parseTemplate`, `hintFor` (hint = common prefix of the options
   + "__", so it never rules out an option: articles show "d__"), `capitalize`.
 - `src/core/sentences/declensionSentences.ts`: first definition: 44 sentence
-  frames from `declination-exercises.md`, def. article + adjective + noun. Nouns
+  frames from `declination-exercises.md`. Each noun phrase gets a random form
+  (PATTERNS, also its score tag): def.Art+noun, ein-word+noun, adj+noun (plural
+  only: no article with a singular countable noun), def.Art+adj+noun,
+  ein-word+adj+noun; adjective endings weak / mixed / strong accordingly. Nouns
   carry tags (person, animal, place, furniture, surface, portable …) and each
   frame's phrase asks for tags, so sentences make sense. No n-nouns yet (user:
   add later as an option); frames needing ein/kein or contractions are left out.

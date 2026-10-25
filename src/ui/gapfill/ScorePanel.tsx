@@ -4,9 +4,16 @@ import { pct } from '../../core/stats.ts'
 // Results so far, one row per combination of tags (e.g. case + pattern).
 // The columns are the tag names that occur, then the counts
 export function ScorePanel({ scores }: { scores: Scoreboard }) {
-  const entries = Object.values(scores);
-  if (!entries.length) return null;
-  const tagNames = [...new Set(entries.flatMap(e => Object.keys(e.tags)))];
+  if (!Object.keys(scores).length) return null;
+  const tagNames = [...new Set(Object.values(scores).flatMap(e => Object.keys(e.tags)))];
+  // Sorted by the tag columns, left to right, so rows stay in place as results come in
+  const entries = Object.values(scores).sort((a, b) => {
+    for (const t of tagNames) {
+      const c = (a.tags[t] ?? '').localeCompare(b.tags[t] ?? '');
+      if (c) return c;
+    }
+    return 0;
+  });
 
   return (
     <section className="scores">

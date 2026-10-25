@@ -19,6 +19,9 @@ export function Modal({ open, onClose, onClosed, className, labelledBy, children
     const dialog = ref.current!;
     if (open && !dialog.open) {
       dialog.showModal();
+      // The browser focuses the first focusable element; an element marked
+      // data-autofocus takes its place
+      dialog.querySelector<HTMLElement>('[data-autofocus]')?.focus();
       // Opening focuses the first button, which can scroll a long dialog; start at the top
       dialog.scrollTop = 0;
     } else if (!open && dialog.open) {

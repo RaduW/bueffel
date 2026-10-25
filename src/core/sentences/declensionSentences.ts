@@ -1,9 +1,12 @@
 // gapFill exercise: declension in whole sentences, from "declination-exercises.md".
-// Every noun phrase is definite article + adjective + noun, in any of the four cases.
+// Each noun phrase takes one of five forms (see PATTERNS), in any of the four cases.
 
 import type { Explanation, Gap, GapFillExercise, GapFillTask, ScoreGroup } from '../gapfill/types.ts'
 import { capitalize, hintFor } from '../gapfill/template.ts'
-import { ADJ_ENDING, CASES, caseIndex, DEF_ARTICLE, DEF_OPTIONS, ENDING_OPTIONS, GENDER_HEADER, type CaseId, type Gender } from '../grammar.ts'
+import {
+  ADJ_ENDING, CASES, caseIndex, DEF_ARTICLE, DEF_OPTIONS, EIN_ENDING, EIN_WORDS_PL, EIN_WORDS_SG, ENDING_OPTIONS,
+  GENDER_HEADER, type CaseId, type CaseIndex, type Gender,
+} from '../grammar.ts'
 import { nounForm, type Noun } from '../nouns.ts'
 import { pick } from '../random.ts'
 
@@ -38,6 +41,13 @@ const NOUNS: SentenceNoun[] = [
   { w: 'Freunde', g: 'p', dat: 'Freunden', opts: ['Freunde', 'Freunden', 'Freundes'], tags: ['person'] },
   { w: 'Kinder', g: 'p', dat: 'Kindern', opts: ['Kinder', 'Kindern', 'Kinders'], tags: ['person'], adjectives: ['klein', 'groß', 'nett'] },
   { w: 'Bücher', g: 'p', dat: 'Büchern', opts: ['Bücher', 'Büchern', 'Büchers'], tags: ['thing', 'portable'] },
+  // More plurals, for the form without an article (plural only)
+  { w: 'Hunde', g: 'p', dat: 'Hunden', opts: ['Hunde', 'Hunden', 'Hundes'], tags: ['animal'] },
+  { w: 'Katzen', g: 'p', dat: 'Katzen', opts: ['Katzen', 'Katze', 'Katzens'], tags: ['animal'] },
+  { w: 'Tische', g: 'p', dat: 'Tischen', opts: ['Tische', 'Tischen', 'Tisches'], tags: ['thing', 'furniture', 'surface'] },
+  { w: 'Stühle', g: 'p', dat: 'Stühlen', opts: ['Stühle', 'Stühlen', 'Stühles'], tags: ['thing', 'furniture', 'surface', 'portable'] },
+  { w: 'Lampen', g: 'p', dat: 'Lampen', opts: ['Lampen', 'Lampe', 'Lampens'], tags: ['thing', 'furniture', 'portable'] },
+  { w: 'Häuser', g: 'p', dat: 'Häusern', opts: ['Häuser', 'Häusern', 'Häusers'], tags: ['thing', 'place'] },
 ];
 
 // Adjectives that make sense for people and animals, and for everything else
@@ -120,24 +130,59 @@ const FRAMES: Frame[] = [
   { id: 'legt-auf', text: '{} legt {} auf {}.', phrases: [SUBJECT, p('akk', ['portable']), p('akk', ['surface'])] },
 ];
 
-const PATTERN = 'def.Art+adj+noun';
+// The forms a noun phrase can take; id is also its score tag. Without an article,
+// countable nouns take adjective + noun only in the plural (alte Leute, not
+// *alter Mann*), so that form never picks a singular noun
+interface Pattern { id: string; article: 'def' | 'ein' | 'none'; adjective: boolean; pluralOnly?: boolean }
+
+const PATTERNS: Pattern[] = [
+  { id: 'def.Art+noun', article: 'def', adjective: false },
+  { id: 'ein-word+noun', article: 'ein', adjective: false },
+  { id: 'adj+noun', article: 'none', adjective: true, pluralOnly: true },
+  { id: 'def.Art+adj+noun', article: 'def', adjective: true },
+  { id: 'ein-word+adj+noun', article: 'ein', adjective: true },
+];
+
+// After der/die/das the adjective takes the weak endings, after ein/kein/mein
+// the mixed ones, and without an article the strong ones
+const ADJ_TABLE = { def: ADJ_ENDING.weak, ein: ADJ_ENDING.mixed, none: ADJ_ENDING.strong };
 
 // Shown after each noun: ♂ maskulin, ♀ feminin, ⚲ neutrum, ⚤ Plural. U+FE0E asks
 // for the plain text symbol, not the coloured emoji some phones show for ♂ and ♀
 const GENDER_SIGN: Record<Gender, string> = { m: '♂\uFE0E', f: '♀\uFE0E', n: '⚲\uFE0E', p: '⚤\uFE0E' };
 const CASE_TAG: Record<CaseId, string> = { nom: 'Nom', akk: 'Akk', dat: 'Dat', gen: 'Gen' };
 
-// The gaps of one noun phrase: article, adjective, noun
-function phraseGaps(noun: SentenceNoun, adj: string, caseId: CaseId, sentenceStart: boolean): Gap[] {
-  const ci = caseIndex(caseId);
-  const articles = sentenceStart ? DEF_OPTIONS.map(capitalize) : DEF_OPTIONS;
-  const article = DEF_ARTICLE[noun.g][ci];
-  return [
-    { label: 'Article', options: articles, answer: sentenceStart ? capitalize(article) : article },
-    { label: 'Adjective', options: ENDING_OPTIONS.map(e => adj + e), answer: adj + ADJ_ENDING.weak[noun.g][ci] },
-    // The gender is given: the exercise is about the endings, not about guessing it
-    { label: 'Noun', options: noun.opts, answer: nounForm(noun, ci), note: GENDER_SIGN[noun.g] },
-  ];
+// The gaps of one noun phrase, in the pattern's form: (article) (adjective) noun.
+// einWord: which of ein/kein/mein … to use, for the ein-word patterns
+function phraseGaps(noun: SentenceNoun, adj: string, einWord: string, pattern: Pattern, ci: CaseIndex): Gap[] {
+  const gaps: Gap[] = [];
+  if (pattern.article === 'def') {
+    gaps.push({ label: 'Article', options: DEF_OPTIONS, answer: DEF_ARTICLE[noun.g][ci] });
+  } else if (pattern.article === 'ein') {
+    gaps.push({ label: 'Article', options: ENDING_OPTIONS.map(e => einWord + e), answer: einWord + EIN_ENDING[noun.g][ci] });
+  }
+  if (pattern.adjective) {
+    const table = ADJ_TABLE[pattern.article];
+    gaps.push({ label: 'Adjective', options: ENDING_OPTIONS.map(e => adj + e), answer: adj + table[noun.g][ci] });
+  }
+  // The gender is given: the exercise is about the endings, not about guessing it
+  gaps.push({ label: 'Noun', options: noun.opts, answer: nounForm(noun, ci), note: GENDER_SIGN[noun.g] });
+  return gaps;
+}
+
+// The first word of a sentence: options and answer start with a capital
+function capitalized(gap: Gap): Gap {
+  return { ...gap, options: gap.options.map(capitalize), answer: capitalize(gap.answer) };
+}
+
+// A random pattern and noun that fit the phrase, avoiding nouns already used
+function choose(phrase: Phrase, used: string[]): { pattern: Pattern; noun: SentenceNoun } {
+  const nouns = NOUNS.filter(n =>
+    n.tags.some(t => phrase.tags.includes(t)) && !(phrase.singular && n.g === 'p') && !used.includes(n.w));
+  const patterns = PATTERNS.filter(p => !p.pluralOnly || nouns.some(n => n.g === 'p'));
+  const pattern = pick(patterns);
+  const noun = pick(pattern.pluralOnly ? nouns.filter(n => n.g === 'p') : nouns);
+  return { pattern, noun };
 }
 
 function createTask(): GapFillTask {
@@ -145,28 +190,33 @@ function createTask(): GapFillTask {
   const gaps: Gap[] = [];
   const scores: ScoreGroup[] = [];
   const explanations: Explanation[] = [];
+  // The hints of each phrase's gaps, to put in place of its {}
+  const phraseHints: string[] = [];
   const used: string[] = [];
   const keyParts = [frame.id];
 
   for (const [i, phrase] of frame.phrases.entries()) {
-    const candidates = NOUNS.filter(n =>
-      n.tags.some(t => phrase.tags.includes(t)) && !(phrase.singular && n.g === 'p') && !used.includes(n.w));
-    const noun = pick(candidates);
+    const { pattern, noun } = choose(phrase, used);
     const living = noun.tags.includes('person') || noun.tags.includes('animal');
     const adj = pick(noun.adjectives ?? (living ? PERSON_ADJECTIVES : THING_ADJECTIVES));
+    const einWord = pick(noun.g === 'p' ? EIN_WORDS_PL : EIN_WORDS_SG);
+    const ci = caseIndex(phrase.case);
     used.push(noun.w);
-    keyParts.push(adj, noun.w);
+    keyParts.push(pattern.id, einWord, adj, noun.w);
+
+    let pg = phraseGaps(noun, adj, einWord, pattern, ci);
+    if (i === 0 && frame.text.startsWith('{}')) pg = [capitalized(pg[0]), ...pg.slice(1)];
     const first = gaps.length;
-    gaps.push(...phraseGaps(noun, adj, phrase.case, i === 0 && frame.text.startsWith('{}')));
-    scores.push({ tags: { case: CASE_TAG[phrase.case], pattern: PATTERN }, gaps: [first, first + 1, first + 2] });
+    gaps.push(...pg);
+    phraseHints.push(pg.map(g => `{${hintFor(g.options)}}`).join(' '));
+    scores.push({ tags: { case: CASE_TAG[phrase.case], pattern: pattern.id }, gaps: pg.map((_, k) => first + k) });
     // "Akkusativ Maskulin", "Dativ Plural" … before the phrase, shown after mistakes
-    explanations.push({ gap: first, text: `${CASES[caseIndex(phrase.case)].name} ${GENDER_HEADER[noun.g]}` });
+    explanations.push({ gap: first, text: `${CASES[ci].name} ${GENDER_HEADER[noun.g]}` });
   }
 
-  // Each {} of the frame becomes three gaps, each showing a hint that rules out no option
-  let g = 0;
-  const template = frame.text.replace(/\{\}/g, () =>
-    [0, 1, 2].map(() => `{${hintFor(gaps[g++].options)}}`).join(' '));
+  // Each {} of the frame becomes its phrase's gaps, each showing a hint that rules out no option
+  let n = 0;
+  const template = frame.text.replace(/\{\}/g, () => phraseHints[n++]);
 
   return { key: keyParts.join('|'), template, gaps, scores, explanations };
 }
@@ -176,13 +226,14 @@ export const declensionSentences: GapFillExercise = {
   title: 'Declension in sentences',
   info: `Complete the sentence, one word at a time. Each gap shows the start of the word; choose the right ending from the options below the sentence. After each noun, its gender is given in brackets: ♂\uFE0E maskulin, ♀\uFE0E feminin, ⚲\uFE0E neutrum, ⚤\uFE0E Plural (male and female). A wrong choice turns red: try again until you find the right one. Then the options move on to the next word.
 
-The sentences have one, two or three noun phrases, in any of the four cases. Every noun phrase is made of a definite article, an adjective and a noun, for example: Der alte Mann sieht den kleinen Hund.
+The sentences have one, two or three noun phrases, in any of the four cases. Each noun phrase takes one of five forms:
+der Mann (definite article + noun), einen Mann (ein, kein, mein … + noun), alte Leute (adjective + noun, only in the plural), dem alten Mann (definite article + adjective + noun), einem alten Mann (ein, kein, mein … + adjective + noun).
 
-Two questions help every time: which case does the word's place in the sentence need, and does the article already show it? After der, die, das … the adjective only takes -e or -en.
+Two questions help every time: which case does the word's place in the sentence need, and does the article already show it? After der, die, das … the adjective only takes -e or -en. After ein, kein, mein … it does too, except where the article has no ending (ein alter Mann, ein kleines Kind). Without an article, the adjective shows the case itself.
 
 If you made a mistake, the sentence stays when it's complete, with the case and gender (or Plural) of each noun phrase written in front of it; click Next (or press Enter) to go on. Without mistakes, the next sentence comes by itself.
 
-Your results are counted per case, separately for each noun phrase: a phrase counts as a success when all its words were right at the first try. Skipped sentences are not counted.`,
+Your results are counted per case and form, separately for each noun phrase: a phrase counts as a success when all its words were right at the first try. Skipped sentences are not counted.`,
   next(_settings, previous) {
     let task = createTask();
     for (let tries = 0; task.key === previous?.key && tries < 20; tries++) task = createTask();
