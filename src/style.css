@@ -382,6 +382,9 @@ h1:has(.logo) { display: flex; align-items: center; gap: 10px; }
 .compact .given { font-size: 1.35rem; gap: 8px; margin-top: 8px; }
 .compact .phrase { font-size: 1.25rem; margin: 12px 0 4px; min-height: 1.9rem; }
 .compact .sentence { font-size: 1.3rem; margin: 0 0 8px; }
+/* Notes are hard to read small on a phone: bigger gender signs and case explanations */
+.compact .gap-note { font-size: 1.1em; }
+.compact .explanation { font-size: 0.9em; }
 .compact .scores { margin-top: 20px; }
 .compact .scores table { font-size: 0.8rem; }
 .compact .scores th, .compact .scores td { padding: 5px 4px; }
