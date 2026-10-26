@@ -1,7 +1,8 @@
-import { explanationsByGap, isFilled, type GapFillState } from '../../core/gapfill/session.ts'
+import { explanationsByGap, isFilled, isGroupComplete, type GapFillState } from '../../core/gapfill/session.ts'
 
-// The sentence: solved gaps show their answer in their tone's colour (e.g. the
-// case), given gaps theirs in the "given" colour, the others their hint;
+// The sentence: solved gaps show their answer, in dark grey until their group
+// (noun phrase) is complete, then in their tone's colour (e.g. the case);
+// given gaps show theirs in the "given" colour, the others their hint;
 // the gap being filled is highlighted. After a task with mistakes, the
 // task's explanations appear in brackets before their gaps: the text (the
 // case) in the gap's tone, the detail (the gender) uncoloured. A gap's note
@@ -15,7 +16,10 @@ export function Sentence({ state }: { state: GapFillState }) {
         const { answer, note, given, tone } = state.task.gaps[seg.index];
         const filled = isFilled(state, seg.index);
         const current = seg.index === state.current;
-        const cls = given ? ' prefilled' : filled ? ' solved' + (tone ? ' tone-' + tone : '') : current ? ' current' : '';
+        const cls = given ? ' prefilled'
+          : !filled ? (current ? ' current' : '')
+          : !isGroupComplete(state, seg.index) ? ' solved pending'
+          : ' solved' + (tone ? ' tone-' + tone : '');
         const gap = (
           <>
             <span className={'gap' + cls} aria-current={current || undefined}>

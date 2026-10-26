@@ -334,7 +334,7 @@ Two questions help every time: which case does the word's place in the sentence 
 
 If you made a mistake, the sentence stays when it's complete, with the case and gender of each noun phrase written in front of it, e.g. (Akk m) or (Dat pl); click Next (or press Enter) to go on. Without mistakes, the next sentence comes by itself.
 
-In the settings (gear icon) you choose the cases, forms, genders, how many noun phrases a sentence has, and which ein-words appear. A noun phrase that doesn't fit your choice (e.g. a Nominativ subject when you practise only Dativ) is filled in already, in its own colour, and not counted. The words you fill in take the colour of their case: Nominativ blue, Akkusativ orange, Dativ green, Genitiv purple.
+In the settings (gear icon) you choose the cases, forms, genders, how many noun phrases a sentence has, and which ein-words appear. A noun phrase that doesn't fit your choice (e.g. a Nominativ subject when you practise only Dativ) is filled in already, in its own colour, and not counted. Once a noun phrase is complete, its words take the colour of its case: Nominativ blue, Akkusativ orange, Dativ green, Genitiv purple.
 
 Your results are counted per case and form, separately for each noun phrase: a phrase counts as a success when all its words were right at the first try. Skipped sentences are not counted.`,
   settings: SETTINGS,

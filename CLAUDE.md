@@ -89,8 +89,9 @@ row at a time. Built so the same page serves many exercises (declension, verbs �
   ({answer, options, label?, note?, given?, tone?}; note is always shown in grey
   brackets after the gap, e.g. the noun's gender sign ♂ ♀ ⚲ ⚤; given = filled in
   from the start, italic in `--given`, skipped by the session, not scored; tone =
-  colour once solved, 'nom'|'akk'|'dat'|'gen' -> the `--case-*` colours of the
-  declension tables), `scores` ({tags, gaps}: one group per asked noun phrase),
+  'nom'|'akk'|'dat'|'gen' -> the `--case-*` colours of the declension tables,
+  shown only once every gap of its score group is filled (`isGroupComplete`;
+  before that dark grey `--pending`, so the colour doesn't give the case away)), `scores` ({tags, gaps}: one group per asked noun phrase),
   `explanations?` ({gap, text, detail?}: text "Dat" in the gap's tone, detail
   "pl" grey (user: colour only the case, not the gender), shown in brackets
   before that gap only after a task finished with mistakes).

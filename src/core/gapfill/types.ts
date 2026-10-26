@@ -54,8 +54,9 @@ export interface Gap {
   // Shown filled in from the start, in its own colour; not asked and not scored
   // (e.g. a noun phrase in a case the learner didn't select)
   given?: boolean
-  // Colours the gap once it is filled; the page knows the colours of the
-  // four cases: 'nom', 'akk', 'dat', 'gen'
+  // Colours the gap once all gaps of its score group are filled (so the colour
+  // doesn't give away the case while the phrase is being filled); the page
+  // knows the colours of the four cases: 'nom', 'akk', 'dat', 'gen'
   tone?: string
 }
 

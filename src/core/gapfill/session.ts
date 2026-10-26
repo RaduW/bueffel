@@ -40,6 +40,14 @@ export function isFilled(s: GapFillState, index: number): boolean {
   return index < s.current || !!s.task.gaps[index]?.given;
 }
 
+// A filled gap whose score group is complete: every gap of the group is
+// filled. Its tone (e.g. the case) can show now without giving it away for
+// the group's remaining gaps. A gap in no group: once filled
+export function isGroupComplete(s: GapFillState, index: number): boolean {
+  const groups = s.task.scores.filter(g => g.gaps.includes(index));
+  return isFilled(s, index) && groups.every(g => g.gaps.every(i => isFilled(s, i)));
+}
+
 export function isFinished(s: GapFillState): boolean {
   return s.current >= s.task.gaps.length;
 }
