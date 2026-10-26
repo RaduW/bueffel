@@ -1,50 +1,36 @@
-// The running statistics shown in the app. Functions return new objects.
+// An exercise's running statistics: the scoreboard and the current streak.
+// The header tally is derived from them. Functions return new objects.
 
-export interface Counts {
+import { totals, withScores, type ScoreResult, type Scoreboard } from './scores.ts'
+
+export interface Progress {
+  scores: Scoreboard
+  // Score groups in a row without a mistake
+  streak: number
+}
+
+// The numbers in the header
+export interface Tally {
   shown: number
   perfect: number
-}
-
-export interface Stats extends Counts {
   streak: number
-  byExercise: Record<string, Counts>
 }
 
-export function emptyStats(): Stats {
-  return { shown: 0, perfect: 0, streak: 0, byExercise: {} };
+export function emptyProgress(): Progress {
+  return { scores: {}, streak: 0 };
 }
 
-export function exerciseCounts(st: Stats, exerciseId: string): Counts {
-  return st.byExercise[exerciseId] ?? { shown: 0, perfect: 0 };
+// Add the results of a finished task. The streak follows the groups in order,
+// so a mistake in a sentence's second phrase ends it after the first
+export function withResults(p: Progress, results: ScoreResult[]): Progress {
+  let streak = p.streak;
+  for (const r of results) streak = r.success ? streak + 1 : 0;
+  return { scores: withScores(p.scores, results), streak };
 }
 
-function addToExercise(st: Stats, exerciseId: string, delta: Partial<Counts>): Record<string, Counts> {
-  const c = exerciseCounts(st, exerciseId);
-  return {
-    ...st.byExercise,
-    [exerciseId]: { shown: c.shown + (delta.shown ?? 0), perfect: c.perfect + (delta.perfect ?? 0) },
-  };
-}
-
-// A question was started
-export function withShown(st: Stats, exerciseId: string): Stats {
-  return { ...st, shown: st.shown + 1, byExercise: addToExercise(st, exerciseId, { shown: 1 }) };
-}
-
-// A question was finished; perfect if it had no mistakes
-export function withFinished(st: Stats, exerciseId: string, perfect: boolean): Stats {
-  if (!perfect) return { ...st, streak: 0 };
-  return {
-    ...st,
-    perfect: st.perfect + 1,
-    streak: st.streak + 1,
-    byExercise: addToExercise(st, exerciseId, { perfect: 1 }),
-  };
-}
-
-// A started question was skipped
-export function withStreakBroken(st: Stats): Stats {
-  return { ...st, streak: 0 };
+export function tally(p: Progress): Tally {
+  const t = totals(p.scores);
+  return { shown: t.attempts, perfect: t.successes, streak: p.streak };
 }
 
 export function pct(perfect: number, shown: number): string {

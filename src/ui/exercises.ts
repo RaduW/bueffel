@@ -15,6 +15,6 @@ export interface ExercisePage {
 }
 
 export const EXERCISE_PAGES: ExercisePage[] = [
-  { route: 'declension', title: 'Declination practice', component: Declension },
+  { route: 'declension', title: 'Declension practice', component: Declension },
   { route: 'sentences', title: declensionSentences.title, component: gapFillPage(declensionSentences) },
 ];

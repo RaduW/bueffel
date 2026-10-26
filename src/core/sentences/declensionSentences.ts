@@ -4,7 +4,7 @@
 import type { Explanation, Gap, GapFillExercise, GapFillTask, ScoreGroup } from '../gapfill/types.ts'
 import { capitalize, hintFor } from '../gapfill/template.ts'
 import {
-  ADJ_ENDING, caseIndex, DEF_ARTICLE, DEF_OPTIONS, EIN_ENDING, EIN_WORDS_PL, EIN_WORDS_SG, ENDING_OPTIONS,
+  ADJ_ENDING, CASE_SHORT, caseIndex, DEF_ARTICLE, DEF_OPTIONS, EIN_ENDING, EIN_WORDS_PL, EIN_WORDS_SG, ENDING_OPTIONS, GENDER_SHORT,
   type CaseId, type CaseIndex, type Gender,
 } from '../grammar.ts'
 import { nounForm, type Noun } from '../nouns.ts'
@@ -150,8 +150,6 @@ const ADJ_TABLE = { def: ADJ_ENDING.weak, ein: ADJ_ENDING.mixed, none: ADJ_ENDIN
 // Shown after each noun: ♂ maskulin, ♀ feminin, ⚲ neutrum, ⚤ Plural. U+FE0E asks
 // for the plain text symbol, not the coloured emoji some phones show for ♂ and ♀
 const GENDER_SIGN: Record<Gender, string> = { m: '♂\uFE0E', f: '♀\uFE0E', n: '⚲\uFE0E', p: '⚤\uFE0E' };
-const CASE_TAG: Record<CaseId, string> = { nom: 'Nom', akk: 'Akk', dat: 'Dat', gen: 'Gen' };
-const GENDER_SHORT: Record<Gender, string> = { m: 'm', n: 'n', f: 'f', p: 'pl' };
 
 // The gaps of one noun phrase, in the pattern's form: (article) (adjective) noun.
 // einWord: which of ein/kein/mein … to use, for the ein-word patterns
@@ -210,9 +208,9 @@ function createTask(): GapFillTask {
     const first = gaps.length;
     gaps.push(...pg);
     phraseHints.push(pg.map(g => `{${hintFor(g.options)}}`).join(' '));
-    scores.push({ tags: { case: CASE_TAG[phrase.case], pattern: pattern.id }, gaps: pg.map((_, k) => first + k) });
+    scores.push({ tags: { case: CASE_SHORT[phrase.case], pattern: pattern.id }, gaps: pg.map((_, k) => first + k) });
     // "Akk m", "Dat pl" … before the phrase, shown after mistakes
-    explanations.push({ gap: first, text: `${CASE_TAG[phrase.case]} ${GENDER_SHORT[noun.g]}` });
+    explanations.push({ gap: first, text: `${CASE_SHORT[phrase.case]} ${GENDER_SHORT[noun.g]}` });
   }
 
   // Each {} of the frame becomes its phrase's gaps, each showing a hint that rules out no option

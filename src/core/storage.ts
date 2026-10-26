@@ -1,35 +1,36 @@
-// Settings, statistics and preferences in localStorage. Every access is guarded:
-// storage can be unavailable (private mode, blocked site data) and the app
-// then works for the current visit only.
+// Settings and statistics in localStorage, one key per exercise, plus the theme.
+// Every access is guarded: storage can be unavailable (private mode, blocked
+// site data) and the app then works for the current visit only.
 
-import { defaultSettings, type Settings } from './settings.ts'
-import { emptyStats, type Stats } from './stats.ts'
+import { emptyProgress, type Progress } from './stats.ts'
 
-export interface State {
-  settings: Settings
-  stats: Stats
+export interface Saved<S> {
+  settings: S
+  progress: Progress
 }
 
 // The keys carry the app's name: other apps on the same origin
 // (e.g. raduw.github.io) share this storage
-const STATE_KEY = 'bueffel-state-v1';
+const exerciseKey = (id: string) => `bueffel-ex-${id}-v1`;
 const THEME_KEY = 'bueffel-theme';
+// Earlier versions; dropped, not migrated
+const OLD_KEYS = ['bueffel-state-v1'];
 
-export function defaultState(): State {
-  return { settings: defaultSettings(), stats: emptyStats() };
-}
-
-export function loadState(): State {
+// defaults: the exercise's default settings, also filling settings added since the last save
+export function loadExercise<S extends object>(id: string, defaults: S): Saved<S> {
   try {
-    const saved = JSON.parse(localStorage.getItem(STATE_KEY) ?? 'null');
-    if (saved && saved.settings && saved.stats) return saved;
+    for (const k of OLD_KEYS) localStorage.removeItem(k);
+    const saved = JSON.parse(localStorage.getItem(exerciseKey(id)) ?? 'null');
+    if (saved?.settings && saved.progress?.scores) {
+      return { settings: { ...defaults, ...saved.settings }, progress: { ...emptyProgress(), ...saved.progress } };
+    }
   } catch { /* ignore corrupt or blocked storage */ }
-  return defaultState();
+  return { settings: defaults, progress: emptyProgress() };
 }
 
-export function saveState(state: State) {
+export function saveExercise<S>(id: string, saved: Saved<S>) {
   try {
-    localStorage.setItem(STATE_KEY, JSON.stringify(state));
+    localStorage.setItem(exerciseKey(id), JSON.stringify(saved));
   } catch { /* storage unavailable: stats live for this session only */ }
 }
 

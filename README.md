@@ -64,7 +64,7 @@ The service worker only runs in production builds (`npm run build` / `npm run pr
 
 ## How to use it
 
-The start page lists the exercises as cards: **Declination practice** and **Declension in sentences**. Click one to open it. Clicking the icon or the name **Büffel** at the top opens the **About** dialog (what the app is, privacy, version, source link). The back arrow next to the exercise's title finishes it and returns to the start page; leaving a question you've already started counts like **Skip**. Each page has its own address (`#/declension`, `#/sentences`), so the browser's Back button and bookmarks work.
+The start page lists the exercises as cards: **Declension practice** and **Declension in sentences**. Click one to open it. Clicking the icon or the name **Büffel** at the top opens the **About** dialog (what the app is, privacy, version, source link); the gear icon on the start page opens the app settings (the theme: device, light or dark). The back arrow next to the exercise's title finishes it and returns to the start page; leaving a question you've already started counts like **Skip** (it isn't counted). Each page has its own address (`#/declension`, `#/sentences`), so the browser's Back button and bookmarks work.
 
 **Deklination**
 
@@ -93,34 +93,35 @@ The start page lists the exercises as cards: **Declination practice** and **Decl
 
 A whole sentence is completed one word at a time, e.g. *D__ alt__ Mann__ (♂) sieht d__ klein__ Hund__ (♂).* Each noun's gender is given in grey brackets after it: ♂ maskulin, ♀ feminin, ⚲ neutrum, ⚤ plural. The gap being filled is highlighted, and below the sentence are the options for that word only: wrong choices turn red, the right one fills the gap and the options move on to the next word. A sentence solved without mistakes moves on by itself; after a mistake it stays, with the case and gender of each noun phrase written in front of it (*(Nom m) Der alte Mann sieht (Akk pl) die kleinen Kinder.*), until you click **Next** or press **Enter**. The **?** button explains the exercise.
 
-The sentences come from `declination-exercises.md`: 44 sentences with one, two or three noun phrases, in all four cases. Each noun phrase takes one of five forms, chosen at random: definite article + noun (*der Mann*), ein/kein/mein … + noun (*einen Mann*), adjective + noun (*alte Leute*; only in the plural, as countable nouns need an article in the singular), definite article + adjective + noun (*dem alten Mann*), and ein/kein/mein … + adjective + noun (*einem alten Mann*). Nouns are matched to the sentence (only people buy or give, cats sit on furniture, and so on). Not included yet: n-nouns (*Student*, *Junge* …), sentences that need *ein/kein*, and sentences where the article would merge with the preposition (*beim*, *vom*, *im*). The header shows the same tally as in Declination practice (shown, success, errors, accuracy, streak), counting finished sentences: a sentence is a success when it had no mistakes. The **Results** table counts each noun phrase separately, by case and form; a phrase is a success when all its words were right at the first try. Skipped sentences don't count. The tally and these results aren't saved yet: they reset when you leave the exercise.
+The sentences come from `declination-exercises.md`: 44 sentences with one, two or three noun phrases, in all four cases. Each noun phrase takes one of five forms, chosen at random: definite article + noun (*der Mann*), ein/kein/mein … + noun (*einen Mann*), adjective + noun (*alte Leute*; only in the plural, as countable nouns need an article in the singular), definite article + adjective + noun (*dem alten Mann*), and ein/kein/mein … + adjective + noun (*einem alten Mann*). Nouns are matched to the sentence (only people buy or give, cats sit on furniture, and so on). Not included yet: n-nouns (*Student*, *Junge* …), sentences that need *ein/kein*, and sentences where the article would merge with the preposition (*beim*, *vom*, *im*). The header shows the same tally as in Declension practice (shown, success, errors, accuracy, streak), counting each noun phrase as one puzzle: a sentence with two noun phrases counts two, and a phrase is a success when all its words were right at the first try. The **Results** table breaks this down by case and form. Skipped sentences don't count. The gear icon opens this exercise's settings: **Reset statistics** and **Clear history**.
 
 ## Statistics
 
 The header shows:
 
-- **shown:** how many questions you've answered
+- **shown:** how many puzzles you've finished. A puzzle is one question in Declension practice, and one noun phrase in Declension in sentences
 - **success:** how many of those you solved without a wrong click
-- **errors:** how many weren't a success (at least one wrong click, or started and then skipped)
-- **accuracy:** the share of questions with no mistakes
-- **streak:** how many questions in a row you've solved without a mistake
+- **errors:** how many had at least one wrong click
+- **accuracy:** the share of puzzles with no mistakes
+- **streak:** how many puzzles in a row you've solved without a mistake
 
-The table below breaks these numbers down by exercise (wide layout only).
+Only finished puzzles count: skipping, or leaving the exercise in the middle of a question, changes nothing.
 
-A question only counts once you click your first answer, so reloading the page doesn't change the numbers.
+Both exercises keep their numbers the same way: a table of results per combination of tags (Declension practice: exercise, case and gender; Declension in sentences: case and form), each with attempts, successes and wrong clicks. The header tally and the tables below it are sums over this table.
 
-Statistics and settings are saved in the browser's `localStorage`, so they persist between visits:
+Statistics and settings are saved in the browser's `localStorage`, one key per exercise, so they persist between visits:
 
-- `bueffel-state-v1`: statistics and the exercise, noun, gender and case selections
+- `bueffel-ex-declension-v1`: Declension practice: its exercise, noun, gender and case selections, and its statistics
+- `bueffel-ex-declension-sentences-v1`: Declension in sentences: its statistics
 - `bueffel-theme`: the theme (`system`, `light` or `dark`)
 
-**Reset statistics** clears these statistics but keeps your settings and the daily history below.
+**Reset statistics** (in the exercise's settings) clears that exercise's statistics but keeps its settings and its daily history.
 
 ### Daily history (IndexedDB)
 
-The app also keeps a permanent log with one record per calendar day, in the browser's IndexedDB (database `bueffel-history`, store `days`). It isn't shown in the app yet. Each day records questions started (`shown`), questions solved without a mistake (`perfect`) and wrong clicks (`mistakes`). These are kept as a total and broken down by exercise, case and gender. **Reset statistics** does not clear this history; to delete it, use **Settings → Clear history**.
+The app also keeps a permanent log in the browser's IndexedDB (database `bueffel-history`, store `results`), with one record per calendar day and exercise. It isn't shown in the app yet. Each record holds the day's results in the same shape as the statistics above (per tag combination: attempts, successes, wrong clicks). **Reset statistics** does not clear this history; to delete an exercise's history, use **Clear history** in its settings.
 
-To look at it, open the browser's developer tools: **Application → IndexedDB → bueffel-history → days** in Chrome or Edge, or **Storage → Indexed DB** in Firefox and Safari. The app also asks the browser to keep its storage permanently; Firefox may show a prompt for this.
+To look at it, open the browser's developer tools: **Application → IndexedDB → bueffel-history → results** in Chrome or Edge, or **Storage → Indexed DB** in Firefox and Safari. The app also asks the browser to keep its storage permanently; Firefox may show a prompt for this.
 
 ## Files
 
@@ -128,7 +129,9 @@ To look at it, open the browser's developer tools: **Application → IndexedDB �
 |---|---|
 | `index.html` | The page (Vite entry point) |
 | `src/core/` | Logic without UI: declension tables, nouns, exercises, questions, statistics, settings, storage |
+| `src/core/scores.ts` | Results per tag combination, shared by all exercises |
 | `src/core/history.ts` | Daily history in IndexedDB |
+| `src/ui/useExerciseProgress.ts` | Loads and saves an exercise's settings and statistics, and writes its history |
 | `src/ui/` | Shared React components: `App.tsx` (shows the start page or an exercise, by URL hash), `Home.tsx` (start page: one card per exercise), `exercises.ts` (the list of exercises), `Header`, `Modal` |
 | `src/ui/declension/` | The Deklination exercise; `Declension.tsx` holds its state and lays out the page |
 | `src/core/gapfill/` | gapFill, a reusable kind of exercise (fill a sentence gap by gap from options): the exercise interface, the template parser, the progress and scoring logic |

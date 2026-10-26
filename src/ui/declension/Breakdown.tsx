@@ -1,14 +1,15 @@
 import { EXERCISES } from '../../core/exercises.ts'
-import { exerciseCounts, pct, type Stats } from '../../core/stats.ts'
+import { totals, type Scoreboard } from '../../core/scores.ts'
+import { pct } from '../../core/stats.ts'
 
 interface Props {
-  stats: Stats
+  scores: Scoreboard
   onSkip: () => void
   onReset: () => void
 }
 
 // Per-exercise statistics with Skip and Reset (wide layout only)
-export function Breakdown({ stats, onSkip, onReset }: Props) {
+export function Breakdown({ scores, onSkip, onReset }: Props) {
   return (
     <section className="breakdown">
       <h2>Per exercise</h2>
@@ -16,14 +17,14 @@ export function Breakdown({ stats, onSkip, onReset }: Props) {
         <thead><tr><th>Exercise</th><th>Shown</th><th>Success</th><th>Errors</th><th>Accuracy</th></tr></thead>
         <tbody>
           {EXERCISES.map(ex => {
-            const e = exerciseCounts(stats, ex.id);
+            const e = totals(scores, { exercise: ex.id });
             return (
               <tr key={ex.id}>
                 <td>{ex.name}</td>
-                <td>{e.shown}</td>
-                <td>{e.perfect}</td>
-                <td>{e.shown - e.perfect}</td>
-                <td>{pct(e.perfect, e.shown)}</td>
+                <td>{e.attempts}</td>
+                <td>{e.successes}</td>
+                <td>{e.attempts - e.successes}</td>
+                <td>{pct(e.successes, e.attempts)}</td>
               </tr>
             );
           })}

@@ -19,6 +19,10 @@ export function caseIndex(id: string): CaseIndex {
 }
 
 export const GENDER_LABEL: Record<Gender, string> = { m: 'maskulin', n: 'neutrum', f: 'feminin', p: 'Plural' };
+
+// Short names, used in score tags and explanations: "Dat", "pl"
+export const CASE_SHORT: Record<CaseId, string> = { nom: 'Nom', akk: 'Akk', dat: 'Dat', gen: 'Gen' };
+export const GENDER_SHORT: Record<Gender, string> = { m: 'm', n: 'n', f: 'f', p: 'pl' };
 export const GENDER_HEADER: Record<Gender, string> = { m: 'Maskulin', n: 'Neutrum', f: 'Feminin', p: 'Plural' };
 export const GENDERS = Object.keys(GENDER_LABEL) as Gender[];
 

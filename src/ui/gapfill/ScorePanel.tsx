@@ -1,4 +1,4 @@
-import type { Scoreboard } from '../../core/gapfill/scoreboard.ts'
+import type { Scoreboard } from '../../core/scores.ts'
 import { pct } from '../../core/stats.ts'
 
 // Results so far, one row per combination of tags (e.g. case + pattern).

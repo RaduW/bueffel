@@ -22,7 +22,7 @@ export interface Question {
   adj: string | null
   slots: SlotState[]
   mistakes: number
-  // Set by the first answer: a question counts as shown once the user starts it
+  // Set by the first answer: changing settings keeps a started question
   touched: boolean
   finished: boolean
 }
@@ -57,8 +57,6 @@ export function createQuestion(s: Settings, previousKey = ''): Question | null {
 export interface AnswerOutcome {
   question: Question
   result: 'correct' | 'wrong' | 'ignored'
-  // This answer was the first one given to the question
-  started: boolean
   // This answer solved the last open slot
   finished: boolean
 }
@@ -68,7 +66,7 @@ export interface AnswerOutcome {
 export function answer(q: Question, slotIndex: number, opt: string): AnswerOutcome {
   const slot = q.slots[slotIndex];
   if (!slot || slot.solved || q.finished || slot.wrong.includes(opt)) {
-    return { question: q, result: 'ignored', started: false, finished: false };
+    return { question: q, result: 'ignored', finished: false };
   }
 
   const correct = opt === slot.answer;
@@ -85,7 +83,6 @@ export function answer(q: Question, slotIndex: number, opt: string): AnswerOutco
       finished,
     },
     result: correct ? 'correct' : 'wrong',
-    started: !q.touched,
     finished,
   };
 }

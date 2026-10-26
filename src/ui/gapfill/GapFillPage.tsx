@@ -3,23 +3,24 @@
 // the GapFillExercise definition.
 
 import { useEffect, useRef, useState, type ComponentType } from 'react'
-import { withResults, type Scoreboard } from '../../core/gapfill/scoreboard.ts'
 import { isFinished, pick, scoreResults, startTask, totalMistakes, type GapFillState } from '../../core/gapfill/session.ts'
 import type { GapFillExercise, SettingValues } from '../../core/gapfill/types.ts'
-import { emptyStats, withFinished, withShown } from '../../core/stats.ts'
+import { tally } from '../../core/stats.ts'
 import { ResultBanner } from '../declension/ResultBanner.tsx'
 import { Header } from '../Header.tsx'
-import { HelpIcon } from '../icons.tsx'
+import { HelpIcon, SettingsIcon } from '../icons.tsx'
 import { StatsBar } from '../StatsBar.tsx'
 import { ADVANCE_DELAY_MS, COMPACT_QUERY } from '../layout.ts'
+import { useExerciseProgress } from '../useExerciseProgress.ts'
 import { useMediaQuery } from '../useMediaQuery.ts'
 import { HelpDialog } from './HelpDialog.tsx'
 import { OptionRow } from './OptionRow.tsx'
 import { ScorePanel } from './ScorePanel.tsx'
 import { Sentence } from './Sentence.tsx'
+import { SettingsDialog } from './SettingsDialog.tsx'
 
-// No settings yet
-const SETTINGS: SettingValues = {};
+// No exercise settings yet
+const NO_SETTINGS: SettingValues = {};
 
 interface Props {
   exercise: GapFillExercise
@@ -28,20 +29,19 @@ interface Props {
 
 export function GapFillPage({ exercise, onFinish }: Props) {
   const compact = useMediaQuery(COMPACT_QUERY);
-  const [state, setStateValue] = useState(() => startTask(exercise.next(SETTINGS)));
+  // Saved under the exercise's id, like every exercise's (useExerciseProgress)
+  const { settings, progress, addResults, resetStats, deleteHistory } = useExerciseProgress(exercise.id, NO_SETTINGS);
+  const [state, setStateValue] = useState(() => startTask(exercise.next(settings)));
   // The latest state, also between a click and the next render, so that two
   // clicks in a row never both act on the same version
   const latest = useRef(state);
-  // In memory only, for now: the tally in the header (finished tasks) and the
-  // results per score group
-  const [stats, setStats] = useState(emptyStats);
-  const [scores, setScores] = useState<Scoreboard>({});
   const [helpOpen, setHelpOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const nextButton = useRef<HTMLButtonElement>(null);
 
   // Read by the auto-advance timer when it fires, not when it is started
   const dialogOpen = useRef(false);
-  dialogOpen.current = helpOpen;
+  dialogOpen.current = helpOpen || settingsOpen;
 
   function setState(s: GapFillState) {
     latest.current = s;
@@ -50,7 +50,7 @@ export function GapFillPage({ exercise, onFinish }: Props) {
 
   // Skipping (or Next) draws a new task; an unfinished task is not scored
   function nextTask() {
-    setState(startTask(exercise.next(SETTINGS, latest.current.task)));
+    setState(startTask(exercise.next(settings, latest.current.task)));
   }
 
   function choose(opt: string) {
@@ -59,9 +59,7 @@ export function GapFillPage({ exercise, onFinish }: Props) {
     setState(outcome.state);
     if (outcome.finished) {
       // Only finished tasks count: a skipped one changes nothing, not even the streak
-      const perfect = totalMistakes(outcome.state) === 0;
-      setStats(st => withFinished(withShown(st, exercise.id), exercise.id, perfect));
-      setScores(b => withResults(b, scoreResults(outcome.state)));
+      addResults(scoreResults(outcome.state));
     }
   }
 
@@ -102,14 +100,26 @@ export function GapFillPage({ exercise, onFinish }: Props) {
         onBack={onFinish}
         backLabel="Finish and go back to the exercises"
         actions={
-          <button className="icon-button" title="Help" aria-label="Help" onClick={() => setHelpOpen(true)}>
-            <HelpIcon size={compact ? 24 : 22} />
-          </button>
+          <>
+            <button className="icon-button" title="Help" aria-label="Help" onClick={() => setHelpOpen(true)}>
+              <HelpIcon size={compact ? 24 : 22} />
+            </button>
+            <button className="icon-button" title="Settings" aria-label="Settings" onClick={() => setSettingsOpen(true)}>
+              <SettingsIcon size={compact ? 24 : 22} />
+            </button>
+          </>
         }
       >
-        <StatsBar stats={stats} />
+        <StatsBar stats={tally(progress)} />
       </Header>
       <HelpDialog open={helpOpen} title={exercise.title} info={exercise.info} onClose={() => setHelpOpen(false)} />
+      <SettingsDialog
+        open={settingsOpen}
+        compact={compact}
+        onClose={() => setSettingsOpen(false)}
+        onClearHistory={deleteHistory}
+        onResetStats={() => { resetStats(); }}
+      />
       <main>
         <section className="card gapfill">
           <Sentence state={state} />
@@ -121,7 +131,7 @@ export function GapFillPage({ exercise, onFinish }: Props) {
             </div>
           )}
         </section>
-        <ScorePanel scores={scores} />
+        <ScorePanel scores={progress.scores} />
       </main>
       {compact && (
         // Thumb-reach bar: Skip while answering, result + Next once solved

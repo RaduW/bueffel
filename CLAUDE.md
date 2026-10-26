@@ -38,13 +38,31 @@ peer conflicts with workbox's Babel). `npm ci` works without the flag; a later
 - `src/core/nouns.ts`: noun pools, `nounForm`
 - `src/core/exercises.ts`: exercise definitions (`build` slots, `sample` table cells)
 - `src/core/question.ts`: `createQuestion`, `answer`
-- `src/core/stats.ts`, `settings.ts`, `storage.ts`, `history.ts` (IndexedDB daily log)
+- `src/core/scores.ts`: `ScoreResult` {tags, success, mistakes}, `Scoreboard`
+  (per tag combination: attempts, successes, mistakes), `totals`. Every exercise
+  reports one result per score group of a finished task (declension question:
+  one, tags exercise/case/gender; sentence: one per noun phrase, tags case/pattern)
+- `src/core/stats.ts`: `Progress` {scores, streak}; the header tally (shown =
+  attempts, perfect = successes) is derived, so a sentence with 2 phrases counts 2
+  ("puzzles"; user is fine with the label "shown")
+- `src/core/storage.ts`: localStorage, one key per exercise
+  `bueffel-ex-<id>-v1` = {settings, progress}, plus `bueffel-theme`. The old
+  `bueffel-state-v1` is removed on load (dropped, not migrated: user's choice)
+- `src/core/history.ts`: IndexedDB `bueffel-history` v2, store `results`, one
+  record per [date, exercise] with a `scores` scoreboard. v1's `days` store is
+  deleted on upgrade. `clearHistory(exercise)` clears one exercise
+- `src/ui/useExerciseProgress.ts`: the one mechanism both exercises use: load/save,
+  `addResults` (progress + history), `resetStats`, `deleteHistory`
+- `src/core/settings.ts`: the declension exercise's settings
 - `src/ui/App.tsx`: picks the page from the URL hash (`useHashRoute`): `#/<route>`
   of an exercise, otherwise the home page (`Home.tsx`)
 - `src/ui/exercises.ts`: the exercises on the home page (route, title, component).
   Home: icon + "Büffel" header, a tagline, one card per exercise showing only its
   title (no description or progress on the card; user's choice).
   A new exercise = a new entry here plus its folder
+- Settings: the home page's gear opens `AppSettingsDialog` (theme only, user's
+  choice); each exercise's gear has its own settings with Reset statistics and
+  Clear history for that exercise (`HistoryControls.tsx` shared)
 - `src/ui/AboutDialog.tsx`: opened by the icon + "Büffel" title on the home page;
   the version comes from package.json (`__APP_VERSION__`, defined in vite.config.ts)
 - `src/ui/`: shared `Header` (title, optional back button, actions), `StatsBar`
@@ -86,10 +104,9 @@ row at a time. Built so the same page serves many exercises (declension, verbs �
 - `src/ui/gapfill/GapFillPage.tsx` (+ Sentence, OptionRow, HelpDialog, ScorePanel);
   `gapFillPage(def)` makes the component for `src/ui/exercises.ts`.
 - Decided with the user: help only behind the ? button; skipped tasks are not
-  scored (and don't touch the header tally or streak); tally and scores are in
-  memory only for now (not saved); after a task with
+  scored (and don't touch the header tally or streak); after a task with
   mistakes there is no auto-advance (explanations shown, Next / Enter to go on).
-- Not yet: settings, saving scores, moving the old declension exercise onto
+- Not yet: exercise settings, moving the old declension exercise onto
   gapFill (it is untouched; `ResultBanner` is imported from it, and
   `COMPACT_QUERY` exists in both `src/ui/layout.ts` and `Declension.tsx`).
 
@@ -104,7 +121,8 @@ kept, but not used.
 
 - After a question is solved, it moves on automatically after 1 s; the Next
   button stays. No auto-advance while a dialog is open.
-- A question counts as "shown" only once the first answer is clicked.
+- Only finished tasks count, in every exercise; Skip or leaving changes
+  nothing (not even the streak). The streak follows score groups in order.
 - Storage keys are prefixed `bueffel-`: other apps on raduw.github.io share
   the same origin and storage.
 - Desktop tables dialog is 840px wide so "keinen alten Leuten" fits without scrolling.

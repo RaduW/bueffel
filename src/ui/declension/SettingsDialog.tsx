@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react'
 import { EXERCISES } from '../../core/exercises.ts'
 import { CASES, GENDER_LABEL, GENDERS } from '../../core/grammar.ts'
 import { NOUN_POOLS } from '../../core/nouns.ts'
 import type { Settings } from '../../core/settings.ts'
-import { applyTheme, loadTheme, saveTheme, type Theme } from '../../core/storage.ts'
+import { HistoryField, useClearHistoryButton } from '../HistoryControls.tsx'
 import { Modal } from '../Modal.tsx'
 
 interface Props {
@@ -28,44 +27,9 @@ const POOL_ITEMS: Item[] = Object.entries(NOUN_POOLS).map(([id, p]) => ({ id, la
 const GENDER_ITEMS: Item[] = GENDERS.map(g => ({ id: g, label: GENDER_LABEL[g] }));
 const CASE_ITEMS: Item[] = CASES.map(c => ({ id: c.id, label: c.name }));
 
-const THEMES: { value: Theme; label: string }[] = [
-  { value: 'system', label: 'Device' },
-  { value: 'light', label: 'Light' },
-  { value: 'dark', label: 'Dark' },
-];
-
 export function SettingsDialog(props: Props) {
   const { open, settings, problem, compact, onChange, onClose, onClosed, onClearHistory, onResetStats } = props;
-  const [theme, setTheme] = useState(loadTheme);
-  // Result of Clear history: a status line, or in the compact layout the button's label
-  const [historyMessage, setHistoryMessage] = useState('');
-
-  // Start without the previous message each time the dialog opens
-  useEffect(() => {
-    if (open) setHistoryMessage('');
-  }, [open]);
-
-  // The compact layout shows the message on the button for a moment
-  useEffect(() => {
-    if (!compact || !historyMessage) return;
-    const timer = setTimeout(() => setHistoryMessage(''), 2000);
-    return () => clearTimeout(timer);
-  }, [compact, historyMessage]);
-
-  function changeTheme(t: Theme) {
-    setTheme(t);
-    applyTheme(t);
-    saveTheme(t);
-  }
-
-  async function clearHistory() {
-    const message = await onClearHistory();
-    if (message) setHistoryMessage(message);
-  }
-
-  const clearButton = compact && historyMessage
-    ? <button className="danger" disabled>{historyMessage.replace(/\.$/, '')}</button>
-    : <button className="danger" onClick={clearHistory}>Clear history</button>;
+  const clearHistory = useClearHistoryButton(open, compact, onClearHistory);
 
   return (
     <Modal open={open} onClose={onClose} onClosed={onClosed} labelledBy="settings-title">
@@ -78,35 +42,14 @@ export function SettingsDialog(props: Props) {
         onChange={genders => onChange({ ...settings, genders })} />
       <Checkboxes legend="Cases" id="case-list" items={CASE_ITEMS} selected={settings.cases}
         onChange={cases => onChange({ ...settings, cases })} />
-      <fieldset>
-        <legend>Appearance</legend>
-        <div className="segmented" role="radiogroup" aria-label="Theme">
-          {THEMES.map(t => (
-            <label key={t.value}>
-              <input type="radio" name="theme" value={t.value} checked={theme === t.value} onChange={() => changeTheme(t.value)} />
-              {' '}{t.label}
-            </label>
-          ))}
-        </div>
-      </fieldset>
-
-      {!compact && (
-        <fieldset>
-          <legend>History</legend>
-          <p className="hint">A permanent log of your results per day, for tracking progress. <em>Reset statistics</em> doesn't touch it.</p>
-          <div id="history-row">
-            {clearButton}
-            <span className="hint" role="status">{historyMessage}</span>
-          </div>
-        </fieldset>
-      )}
+      {!compact && <HistoryField {...clearHistory} />}
 
       {problem && <p className="error">{problem}</p>}
 
       <div className="dialog-actions">
         {compact ? (
           <>
-            {clearButton}
+            {clearHistory.button}
             <button className="danger" onClick={onResetStats}>Reset statistics</button>
           </>
         ) : <span></span>}

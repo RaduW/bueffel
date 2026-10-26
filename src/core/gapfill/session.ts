@@ -1,6 +1,7 @@
 // Working through one task: the current gap, wrong picks, and the scores at
 // the end. Functions return new objects, so they can back React state directly.
 
+import type { ScoreResult } from '../scores.ts'
 import { parseTemplate, type Segment } from './template.ts'
 import type { GapFillTask } from './types.ts'
 
@@ -56,11 +57,6 @@ export function pick(s: GapFillState, opt: string): PickOutcome {
   return { state: { ...s, wrong: [...s.wrong, opt], mistakes, touched: true }, result: 'wrong', finished: false };
 }
 
-export interface ScoreResult {
-  tags: Record<string, string>
-  success: boolean
-}
-
 // The explanations to show before each gap, once a task is finished with
 // mistakes; nothing otherwise
 export function explanationsByGap(s: GapFillState): Map<number, string[]> {
@@ -72,5 +68,8 @@ export function explanationsByGap(s: GapFillState): Map<number, string[]> {
 
 // One result per score group of a finished task
 export function scoreResults(s: GapFillState): ScoreResult[] {
-  return s.task.scores.map(g => ({ tags: g.tags, success: g.gaps.every(i => s.mistakes[i] === 0) }));
+  return s.task.scores.map(g => {
+    const mistakes = g.gaps.reduce((sum, i) => sum + s.mistakes[i], 0);
+    return { tags: g.tags, success: mistakes === 0, mistakes };
+  });
 }

@@ -2,48 +2,32 @@
 //
 // The numbers shown in the app come from localStorage (see storage.ts); this is a
 // separate, permanent log that "Reset statistics" does not touch; only
-// Settings → Clear history deletes it. Nothing reads it yet, it's kept for
-// showing progress over time later.
+// Settings → Clear history deletes it (for that exercise). Nothing reads it
+// yet, it's kept for showing progress over time later.
 //
-// Database "bueffel-history", object store "days", one record per local
-// calendar day, keyed by date:
+// Database "bueffel-history", object store "results", one record per local
+// calendar day and exercise, keyed by [date, exercise]:
 //
 //   {
-//     date: '2026-10-18',
-//     total:      { shown, perfect, mistakes },
-//     byExercise: { def: { shown, perfect, mistakes }, ... },
-//     byCase:     { nom: {...}, akk: {...}, dat: {...}, gen: {...} },
-//     byGender:   { m: {...}, n: {...}, f: {...}, p: {...} },
+//     date: '2026-10-26',
+//     exercise: 'declension-sentences',
+//     scores: { 'case=Dat|pattern=def.Art+noun': { tags, attempts, successes, mistakes }, ... },
 //   }
 //
-// shown    = questions started (first answer clicked)
-// perfect  = questions solved without a wrong click
-// mistakes = wrong clicks
+// scores has the same shape as the exercise's scoreboard (scores.ts), so the
+// day's totals are the sum over its entries.
+
+import { withScores, type ScoreResult, type Scoreboard } from './scores.ts'
 
 const DB_NAME = 'bueffel-history';
-const DB_VERSION = 1;
-const STORE = 'days';
-
-export interface DayCounts {
-  shown: number
-  perfect: number
-  mistakes: number
-}
+// Version 1 had a "days" store with declension-only fields; it is dropped
+const DB_VERSION = 2;
+const STORE = 'results';
 
 export interface DayRecord {
   date: string
-  total: DayCounts
-  byExercise: Record<string, DayCounts>
-  byCase: Record<string, DayCounts>
-  byGender: Record<string, DayCounts>
-}
-
-// What a question contributes to the day's record
-export interface ResultEvent {
   exercise: string
-  caseId: string
-  gender: string
-  delta: Partial<DayCounts>
+  scores: Scoreboard
 }
 
 let dbPromise: Promise<IDBDatabase> | null = null;
@@ -52,7 +36,11 @@ function openDb(): Promise<IDBDatabase> {
   dbPromise ??= new Promise((resolve, reject) => {
     const req = indexedDB.open(DB_NAME, DB_VERSION);
     req.onupgradeneeded = () => {
-      req.result.createObjectStore(STORE, { keyPath: 'date' });
+      const db = req.result;
+      if (db.objectStoreNames.contains('days')) db.deleteObjectStore('days');
+      if (!db.objectStoreNames.contains(STORE)) {
+        db.createObjectStore(STORE, { keyPath: ['date', 'exercise'] }).createIndex('exercise', 'exercise');
+      }
     };
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
@@ -67,41 +55,30 @@ function today(): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
-function emptyDay(date: string): DayRecord {
-  return { date, total: zero(), byExercise: {}, byCase: {}, byGender: {} };
+// Runs fn in one readwrite transaction and resolves when it has completed
+async function write(fn: (store: IDBObjectStore) => void): Promise<void> {
+  const db = await openDb();
+  await new Promise<void>((resolve, reject) => {
+    const tx = db.transaction(STORE, 'readwrite');
+    fn(tx.objectStore(STORE));
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+    tx.onabort = () => reject(tx.error);
+  });
 }
 
-function zero(): DayCounts {
-  return { shown: 0, perfect: 0, mistakes: 0 };
-}
-
-function add(target: DayCounts, delta: Partial<DayCounts>) {
-  target.shown += delta.shown ?? 0;
-  target.perfect += delta.perfect ?? 0;
-  target.mistakes += delta.mistakes ?? 0;
-}
-
+// Add a finished task's results to today's record for the exercise.
 // Read-modify-write inside one transaction, so rapid clicks can't lose updates
-export async function recordResult(event: ResultEvent): Promise<void> {
+export async function recordResults(exercise: string, results: ScoreResult[]): Promise<void> {
   void requestPersistentStorage();
   try {
-    const db = await openDb();
-    await new Promise<void>((resolve, reject) => {
-      const tx = db.transaction(STORE, 'readwrite');
-      const store = tx.objectStore(STORE);
+    await write(store => {
       const date = today();
-      const get = store.get(date);
+      const get = store.get([date, exercise]);
       get.onsuccess = () => {
-        const day: DayRecord = get.result ?? emptyDay(date);
-        add(day.total, event.delta);
-        add((day.byExercise[event.exercise] ??= zero()), event.delta);
-        add((day.byCase[event.caseId] ??= zero()), event.delta);
-        add((day.byGender[event.gender] ??= zero()), event.delta);
-        store.put(day);
+        const day: DayRecord = get.result ?? { date, exercise, scores: {} };
+        store.put({ ...day, scores: withScores(day.scores, results) });
       };
-      tx.oncomplete = () => resolve();
-      tx.onerror = () => reject(tx.error);
-      tx.onabort = () => reject(tx.error);
     });
   } catch (e) {
     // IndexedDB unavailable (e.g. some private modes): the app keeps working
@@ -109,15 +86,16 @@ export async function recordResult(event: ResultEvent): Promise<void> {
   }
 }
 
-// Delete every day's record (Settings → Clear history)
-export async function clearHistory(): Promise<void> {
-  const db = await openDb();
-  await new Promise<void>((resolve, reject) => {
-    const tx = db.transaction(STORE, 'readwrite');
-    tx.objectStore(STORE).clear();
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-    tx.onabort = () => reject(tx.error);
+// Delete every day's record of one exercise (its Settings → Clear history)
+export async function clearHistory(exercise: string): Promise<void> {
+  await write(store => {
+    const req = store.index('exercise').openKeyCursor(IDBKeyRange.only(exercise));
+    req.onsuccess = () => {
+      const cursor = req.result;
+      if (!cursor) return;
+      store.delete(cursor.primaryKey);
+      cursor.continue();
+    };
   });
 }
 

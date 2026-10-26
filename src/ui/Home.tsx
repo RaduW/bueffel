@@ -1,12 +1,15 @@
 import { useState } from 'react'
 import { AboutDialog } from './AboutDialog.tsx'
+import { AppSettingsDialog } from './AppSettingsDialog.tsx'
 import { EXERCISE_PAGES } from './exercises.ts'
 import { Header } from './Header.tsx'
+import { SettingsIcon } from './icons.tsx'
 import { navigate } from './useHashRoute.ts'
 
 // The start page: one card per exercise, showing only its title
 export function Home() {
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   return (
     <div className="app">
       <Header
@@ -18,8 +21,15 @@ export function Home() {
           </button>
         }
         iconSize={22}
+        actions={
+          // Settings for the whole app; each exercise has its own as well
+          <button className="icon-button" title="Settings" aria-label="Settings" onClick={() => setSettingsOpen(true)}>
+            <SettingsIcon size={22} />
+          </button>
+        }
       />
       <AboutDialog open={aboutOpen} onClose={() => setAboutOpen(false)} />
+      <AppSettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} />
       <main>
         <p className="tagline">German exercises. Pick one to start.</p>
         <ul className="exercise-list">
