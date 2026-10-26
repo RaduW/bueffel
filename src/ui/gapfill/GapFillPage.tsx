@@ -4,6 +4,7 @@
 
 import { useEffect, useRef, useState, type ComponentType } from 'react'
 import { isFinished, pick, scoreResults, startTask, totalMistakes, type GapFillState } from '../../core/gapfill/session.ts'
+import { defaultValues, emptySelection } from '../../core/gapfill/settings.ts'
 import type { GapFillExercise, SettingValues } from '../../core/gapfill/types.ts'
 import { tally } from '../../core/stats.ts'
 import { ResultBanner } from '../declension/ResultBanner.tsx'
@@ -19,9 +20,6 @@ import { ScorePanel } from './ScorePanel.tsx'
 import { Sentence } from './Sentence.tsx'
 import { SettingsDialog } from './SettingsDialog.tsx'
 
-// No exercise settings yet
-const NO_SETTINGS: SettingValues = {};
-
 interface Props {
   exercise: GapFillExercise
   onFinish: () => void
@@ -30,7 +28,11 @@ interface Props {
 export function GapFillPage({ exercise, onFinish }: Props) {
   const compact = useMediaQuery(COMPACT_QUERY);
   // Saved under the exercise's id, like every exercise's (useExerciseProgress)
-  const { settings, progress, addResults, resetStats, deleteHistory } = useExerciseProgress(exercise.id, NO_SETTINGS);
+  const { settings, setSettings, progress, addResults, resetStats, deleteHistory } =
+    useExerciseProgress(exercise.id, defaultValues(exercise.settings));
+  // The latest settings, for the timer and the key handler set up earlier
+  const latestSettings = useRef(settings);
+  latestSettings.current = settings;
   const [state, setStateValue] = useState(() => startTask(exercise.next(settings)));
   // The latest state, also between a click and the next render, so that two
   // clicks in a row never both act on the same version
@@ -50,7 +52,18 @@ export function GapFillPage({ exercise, onFinish }: Props) {
 
   // Skipping (or Next) draws a new task; an unfinished task is not scored
   function nextTask() {
-    setState(startTask(exercise.next(settings, latest.current.task)));
+    setState(startTask(exercise.next(latestSettings.current, latest.current.task)));
+  }
+
+  const problem = emptySelection(exercise.settings, settings) ?? exercise.problem?.(settings) ?? null;
+
+  function changeSettings(values: SettingValues) {
+    setSettings(values);
+    latestSettings.current = values;
+    // Keep a task the user has already started; otherwise draw one for the new settings
+    const s = latest.current;
+    const ok = !emptySelection(exercise.settings, values) && !exercise.problem?.(values);
+    if (ok && (!s.touched || isFinished(s))) nextTask();
   }
 
   function choose(opt: string) {
@@ -115,8 +128,14 @@ export function GapFillPage({ exercise, onFinish }: Props) {
       <HelpDialog open={helpOpen} title={exercise.title} info={exercise.info} onClose={() => setHelpOpen(false)} />
       <SettingsDialog
         open={settingsOpen}
+        defs={exercise.settings ?? []}
+        values={settings}
+        problem={problem}
         compact={compact}
-        onClose={() => setSettingsOpen(false)}
+        onChange={changeSettings}
+        // The dialog stays open until the settings allow a task
+        onClose={() => { if (!problem) setSettingsOpen(false); }}
+        onClosed={() => setSettingsOpen(false)}
         onClearHistory={deleteHistory}
         onResetStats={() => { resetStats(); }}
       />

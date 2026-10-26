@@ -7,9 +7,13 @@ export interface GapFillExercise {
   title: string
   // Explains the exercise; shown by the help button. Paragraphs are separated by blank lines
   info: string
-  // Not used yet: what the learner will be able to choose (cases, patterns …)
+  // What the learner can choose (cases, forms …), shown in the settings dialog
   settings?: SettingDef[]
-  // The next task to show. previous: the last task, to avoid repeating it
+  // Why no task can be made with these settings, or null if one can. The
+  // settings dialog stays open until this is null
+  problem?(settings: SettingValues): string | null
+  // The next task to show. previous: the last task, to avoid repeating it.
+  // Must return a task even for settings with a problem (e.g. by using the defaults)
   next(settings: SettingValues, previous?: GapFillTask): GapFillTask
 }
 
@@ -25,14 +29,17 @@ export interface GapFillTask {
   // when its gaps were all solved without a wrong pick
   scores: ScoreGroup[]
   // Shown when the task was finished with mistakes, each before its gap,
-  // e.g. the case of a noun phrase: { gap: 0, text: 'Nom m' }
+  // e.g. the case and gender of a noun phrase: { gap: 0, text: 'Nom', detail: 'm' }
   explanations?: Explanation[]
 }
 
 export interface Explanation {
   // Index into the task's gaps
   gap: number
+  // Shown in the gap's tone colour (e.g. the case)
   text: string
+  // Follows the text, uncoloured (e.g. the gender)
+  detail?: string
 }
 
 export interface Gap {
@@ -44,6 +51,12 @@ export interface Gap {
   // Always shown in brackets after the gap, not part of the sentence,
   // e.g. the noun's gender: 'm'
   note?: string
+  // Shown filled in from the start, in its own colour; not asked and not scored
+  // (e.g. a noun phrase in a case the learner didn't select)
+  given?: boolean
+  // Colours the gap once it is filled; the page knows the colours of the
+  // four cases: 'nom', 'akk', 'dat', 'gen'
+  tone?: string
 }
 
 export interface ScoreGroup {
@@ -53,9 +66,13 @@ export interface ScoreGroup {
   gaps: number[]
 }
 
-// Reserved for the exercise settings, not defined in detail yet
+export interface SettingOption { id: string; label: string }
+
+// One setting in the exercise's settings dialog. 'multi': any number of the
+// options, at least one; 'choice': exactly one
 export type SettingDef =
   | { id: string; label: string; type: 'boolean'; default: boolean }
-  | { id: string; label: string; type: 'choice'; options: { id: string; label: string }[]; default: string }
+  | { id: string; label: string; type: 'choice'; options: SettingOption[]; default: string }
+  | { id: string; label: string; type: 'multi'; options: SettingOption[]; default: string[] }
 
 export type SettingValues = Record<string, boolean | string | string[]>

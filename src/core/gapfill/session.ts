@@ -3,12 +3,13 @@
 
 import type { ScoreResult } from '../scores.ts'
 import { parseTemplate, type Segment } from './template.ts'
-import type { GapFillTask } from './types.ts'
+import type { Explanation, GapFillTask } from './types.ts'
 
 export interface GapFillState {
   task: GapFillTask
   segments: Segment[]
-  // The gap being filled; equal to the number of gaps once all are solved
+  // The gap being filled; equal to the number of gaps once all are solved.
+  // Given gaps are never current
   current: number
   // Options already tried and found wrong, for the current gap
   wrong: string[]
@@ -24,7 +25,19 @@ export function startTask(task: GapFillTask): GapFillState {
   if (gaps !== task.gaps.length) {
     throw new Error(`Task ${task.key}: template has ${gaps} gaps, but ${task.gaps.length} are defined`);
   }
-  return { task, segments, current: 0, wrong: [], mistakes: task.gaps.map(() => 0), touched: false };
+  return { task, segments, current: nextAsked(task, 0), wrong: [], mistakes: task.gaps.map(() => 0), touched: false };
+}
+
+// The first gap from `from` on that is asked (not given)
+function nextAsked(task: GapFillTask, from: number): number {
+  let i = from;
+  while (i < task.gaps.length && task.gaps[i].given) i++;
+  return i;
+}
+
+// A gap shows its answer: solved, or given from the start
+export function isFilled(s: GapFillState, index: number): boolean {
+  return index < s.current || !!s.task.gaps[index]?.given;
 }
 
 export function isFinished(s: GapFillState): boolean {
@@ -50,7 +63,7 @@ export function pick(s: GapFillState, opt: string): PickOutcome {
     return { state: s, result: 'ignored', finished: false };
   }
   if (opt === gap.answer) {
-    const state = { ...s, current: s.current + 1, wrong: [], touched: true };
+    const state = { ...s, current: nextAsked(s.task, s.current + 1), wrong: [], touched: true };
     return { state, result: 'correct', finished: isFinished(state) };
   }
   const mistakes = s.mistakes.map((m, i) => i === s.current ? m + 1 : m);
@@ -59,10 +72,10 @@ export function pick(s: GapFillState, opt: string): PickOutcome {
 
 // The explanations to show before each gap, once a task is finished with
 // mistakes; nothing otherwise
-export function explanationsByGap(s: GapFillState): Map<number, string[]> {
-  const byGap = new Map<number, string[]>();
+export function explanationsByGap(s: GapFillState): Map<number, Explanation[]> {
+  const byGap = new Map<number, Explanation[]>();
   if (!isFinished(s) || totalMistakes(s) === 0) return byGap;
-  for (const e of s.task.explanations ?? []) byGap.set(e.gap, [...(byGap.get(e.gap) ?? []), e.text]);
+  for (const e of s.task.explanations ?? []) byGap.set(e.gap, [...(byGap.get(e.gap) ?? []), e]);
   return byGap;
 }
 

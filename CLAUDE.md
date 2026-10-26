@@ -81,12 +81,18 @@ Fill a sentence one gap at a time, picking each word from options; one option
 row at a time. Built so the same page serves many exercises (declension, verbs …).
 
 - `src/core/gapfill/types.ts`: `GapFillExercise` { id, title, info (help text,
-  paragraphs split by blank lines), settings? (reserved, not defined yet),
-  next(settings, previous) -> task }. A task is plain data: `template`
+  paragraphs split by blank lines), settings? (`SettingDef[]`: boolean, choice,
+  multi; the page draws the dialog from them), problem?(settings) (dialog stays
+  open while non-null), next(settings, previous) -> task }. `settings.ts`:
+  `defaultValues`, `multiValue`, `choiceValue`, `emptySelection`. A task is plain data: `template`
   ("{D__} {alt__} {Mann__} sieht …", gaps matched by position), `gaps`
-  ({answer, options, label?, note?}; note is always shown in grey brackets after
-  the gap, e.g. the noun's gender sign ♂ ♀ ⚲ ⚤), `scores` ({tags, gaps}: one group per noun phrase),
-  `explanations?` ({gap, text}: e.g. "Nom m", "Dat pl", shown in brackets
+  ({answer, options, label?, note?, given?, tone?}; note is always shown in grey
+  brackets after the gap, e.g. the noun's gender sign ♂ ♀ ⚲ ⚤; given = filled in
+  from the start, italic in `--given`, skipped by the session, not scored; tone =
+  colour once solved, 'nom'|'akk'|'dat'|'gen' -> the `--case-*` colours of the
+  declension tables), `scores` ({tags, gaps}: one group per asked noun phrase),
+  `explanations?` ({gap, text, detail?}: text "Dat" in the gap's tone, detail
+  "pl" grey (user: colour only the case, not the gender), shown in brackets
   before that gap only after a task finished with mistakes).
   Definitions know nothing about the UI and don't drive gap-to-gap progress.
 - `session.ts`: `startTask`, `pick`, `scoreResults` (a group succeeds when its
@@ -99,14 +105,18 @@ row at a time. Built so the same page serves many exercises (declension, verbs �
   only: no article with a singular countable noun), def.Art+adj+noun,
   ein-word+adj+noun; adjective endings weak / mixed / strong accordingly. Nouns
   carry tags (person, animal, place, furniture, surface, portable …) and each
-  frame's phrase asks for tags, so sentences make sense. No n-nouns yet (user:
+  frame's phrase asks for tags, so sentences make sense. Settings: cases, forms
+  (patterns), genders, noun phrases per sentence, ein-words (ein/kein or all).
+  A phrase is asked if its case is selected and some selected noun + form fits;
+  other phrases are given (user's choice (b): pre-filled in a distinct colour).
+  Frames need a selected length and at least one asked phrase. No n-nouns yet (user:
   add later as an option); frames needing ein/kein or contractions are left out.
 - `src/ui/gapfill/GapFillPage.tsx` (+ Sentence, OptionRow, HelpDialog, ScorePanel);
   `gapFillPage(def)` makes the component for `src/ui/exercises.ts`.
 - Decided with the user: help only behind the ? button; skipped tasks are not
   scored (and don't touch the header tally or streak); after a task with
   mistakes there is no auto-advance (explanations shown, Next / Enter to go on).
-- Not yet: exercise settings, moving the old declension exercise onto
+- Not yet: moving the old declension exercise onto
   gapFill (it is untouched; `ResultBanner` is imported from it, and
   `COMPACT_QUERY` exists in both `src/ui/layout.ts` and `Declension.tsx`).
 

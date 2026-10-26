@@ -1,10 +1,11 @@
 // gapFill exercise: declension in whole sentences, from "declination-exercises.md".
 // Each noun phrase takes one of five forms (see PATTERNS), in any of the four cases.
 
-import type { Explanation, Gap, GapFillExercise, GapFillTask, ScoreGroup } from '../gapfill/types.ts'
+import { choiceValue, multiValue } from '../gapfill/settings.ts'
+import type { Explanation, Gap, GapFillExercise, GapFillTask, ScoreGroup, SettingDef, SettingValues } from '../gapfill/types.ts'
 import { capitalize, hintFor } from '../gapfill/template.ts'
 import {
-  ADJ_ENDING, CASE_SHORT, caseIndex, DEF_ARTICLE, DEF_OPTIONS, EIN_ENDING, EIN_WORDS_PL, EIN_WORDS_SG, ENDING_OPTIONS, GENDER_SHORT,
+  ADJ_ENDING, CASE_SHORT, CASES, caseIndex, DEF_ARTICLE, DEF_OPTIONS, EIN_ENDING, EIN_WORDS_PL, EIN_WORDS_SG, ENDING_OPTIONS, GENDER_LABEL, GENDER_SHORT, GENDERS,
   type CaseId, type CaseIndex, type Gender,
 } from '../grammar.ts'
 import { nounForm, type Noun } from '../nouns.ts'
@@ -174,46 +175,147 @@ function capitalized(gap: Gap): Gap {
   return { ...gap, options: gap.options.map(capitalize), answer: capitalize(gap.answer) };
 }
 
-// A random pattern and noun that fit the phrase, avoiding nouns already used
-function choose(phrase: Phrase, used: string[]): { pattern: Pattern; noun: SentenceNoun } {
+const SETTINGS: SettingDef[] = [
+  {
+    id: 'cases', label: 'Cases', type: 'multi',
+    options: CASES.map(c => ({ id: c.id, label: c.name })), default: CASES.map(c => c.id),
+  },
+  {
+    id: 'patterns', label: 'Forms', type: 'multi',
+    options: [
+      { id: 'def.Art+noun', label: 'der Mann' },
+      { id: 'ein-word+noun', label: 'einen Mann' },
+      { id: 'adj+noun', label: 'alte Leute' },
+      { id: 'def.Art+adj+noun', label: 'dem alten Mann' },
+      { id: 'ein-word+adj+noun', label: 'einem alten Mann' },
+    ],
+    default: PATTERNS.map(p => p.id),
+  },
+  {
+    id: 'genders', label: 'Gender / number', type: 'multi',
+    options: GENDERS.map(g => ({ id: g, label: GENDER_LABEL[g] })), default: [...GENDERS],
+  },
+  {
+    id: 'lengths', label: 'Noun phrases per sentence', type: 'multi',
+    options: [{ id: '1', label: 'One' }, { id: '2', label: 'Two' }, { id: '3', label: 'Three' }],
+    default: ['1', '2', '3'],
+  },
+  {
+    id: 'einWords', label: 'ein-words', type: 'choice',
+    options: [{ id: 'ein-kein', label: 'ein, kein' }, { id: 'all', label: 'Also mein, dein …' }],
+    default: 'all',
+  },
+];
+
+// The settings as the generator uses them
+interface Choice {
+  cases: string[]
+  patterns: Pattern[]
+  genders: string[]
+  lengths: number[]
+  einWordsSg: string[]
+  einWordsPl: string[]
+}
+
+function readChoice(values: SettingValues): Choice {
+  const all = choiceValue(SETTINGS, values, 'einWords') === 'all';
+  const patterns = multiValue(SETTINGS, values, 'patterns');
+  return {
+    cases: multiValue(SETTINGS, values, 'cases'),
+    patterns: PATTERNS.filter(p => patterns.includes(p.id)),
+    genders: multiValue(SETTINGS, values, 'genders'),
+    lengths: multiValue(SETTINGS, values, 'lengths').map(Number),
+    einWordsSg: all ? EIN_WORDS_SG : ['ein', 'kein'],
+    // No plural of "ein"
+    einWordsPl: all ? EIN_WORDS_PL : ['kein'],
+  };
+}
+
+// Every setting allows everything: used for the phrases that are given
+const ANY: Choice = readChoice({});
+
+// The nouns and forms the phrase can take with these settings, avoiding nouns
+// already used. No forms if no noun fits
+function candidates(phrase: Phrase, c: Choice, used: string[]): { nouns: SentenceNoun[]; patterns: Pattern[] } {
   const nouns = NOUNS.filter(n =>
-    n.tags.some(t => phrase.tags.includes(t)) && !(phrase.singular && n.g === 'p') && !used.includes(n.w));
-  const patterns = PATTERNS.filter(p => !p.pluralOnly || nouns.some(n => n.g === 'p'));
+    n.tags.some(t => phrase.tags.includes(t)) && !(phrase.singular && n.g === 'p')
+    && c.genders.includes(n.g) && !used.includes(n.w));
+  const patterns = c.patterns.filter(p => p.pluralOnly ? nouns.some(n => n.g === 'p') : nouns.length > 0);
+  return { nouns, patterns };
+}
+
+// Asked (in a selected case, and some noun and form fit), or given
+function asked(phrase: Phrase, c: Choice): boolean {
+  return c.cases.includes(phrase.case) && candidates(phrase, c, []).patterns.length > 0;
+}
+
+// Frames of a selected length with at least one phrase to ask
+function framesFor(c: Choice): Frame[] {
+  return FRAMES.filter(f => c.lengths.includes(f.phrases.length) && f.phrases.some(ph => asked(ph, c)));
+}
+
+// A random pattern and noun that fit the phrase, or null if none is left
+function choose(phrase: Phrase, c: Choice, used: string[]): { pattern: Pattern; noun: SentenceNoun } | null {
+  const { nouns, patterns } = candidates(phrase, c, used);
+  if (!patterns.length) return null;
   const pattern = pick(patterns);
   const noun = pick(pattern.pluralOnly ? nouns.filter(n => n.g === 'p') : nouns);
   return { pattern, noun };
 }
 
-function createTask(): GapFillTask {
-  const frame = pick(FRAMES);
+// A sentence for these settings. Phrases in a case that isn't selected (or
+// that no selected noun or form fits) are given: filled in, not scored. Null
+// if, in the end, nothing is left to ask (the nouns for it went to other phrases)
+function createTask(c: Choice, frames: Frame[]): GapFillTask | null {
+  const frame = pick(frames);
   const gaps: Gap[] = [];
   const scores: ScoreGroup[] = [];
   const explanations: Explanation[] = [];
   // The hints of each phrase's gaps, to put in place of its {}
   const phraseHints: string[] = [];
-  const used: string[] = [];
   const keyParts = [frame.id];
 
+  // Nouns for the asked phrases first, so the given ones don't take them
+  const isAsked = frame.phrases.map(ph => asked(ph, c));
+  const used: string[] = [];
+  const chosen = frame.phrases.map(() => null as ReturnType<typeof choose>);
+  for (const askedPass of [true, false]) {
+    for (const [i, phrase] of frame.phrases.entries()) {
+      if (isAsked[i] !== askedPass || chosen[i]) continue;
+      let ch = askedPass ? choose(phrase, c, used) : null;
+      if (!ch) {
+        // Given: any noun and form; a noun used twice only if nothing else fits
+        isAsked[i] = false;
+        ch = choose(phrase, ANY, used) ?? choose(phrase, ANY, [])!;
+      }
+      chosen[i] = ch;
+      used.push(ch.noun.w);
+    }
+  }
+  if (!isAsked.some(Boolean)) return null;
+
   for (const [i, phrase] of frame.phrases.entries()) {
-    const { pattern, noun } = choose(phrase, used);
+    const { pattern, noun } = chosen[i]!;
     const living = noun.tags.includes('person') || noun.tags.includes('animal');
     const adj = pick(noun.adjectives ?? (living ? PERSON_ADJECTIVES : THING_ADJECTIVES));
-    const einWord = pick(noun.g === 'p' ? EIN_WORDS_PL : EIN_WORDS_SG);
+    const einWord = pick(noun.g === 'p' ? c.einWordsPl : c.einWordsSg);
     const ci = caseIndex(phrase.case);
-    used.push(noun.w);
     keyParts.push(pattern.id, einWord, adj, noun.w);
 
-    let pg = phraseGaps(noun, adj, einWord, pattern, ci);
+    let pg = phraseGaps(noun, adj, einWord, pattern, ci)
+      .map((g): Gap => isAsked[i] ? { ...g, tone: phrase.case } : { ...g, given: true });
     if (i === 0 && frame.text.startsWith('{}')) pg = [capitalized(pg[0]), ...pg.slice(1)];
     const first = gaps.length;
     gaps.push(...pg);
-    phraseHints.push(pg.map(g => `{${hintFor(g.options)}}`).join(' '));
+    // A given gap's braces hold its answer, an asked one's a hint that rules out no option
+    phraseHints.push(pg.map(g => `{${g.given ? g.answer : hintFor(g.options)}}`).join(' '));
+    if (!isAsked[i]) continue;
     scores.push({ tags: { case: CASE_SHORT[phrase.case], pattern: pattern.id }, gaps: pg.map((_, k) => first + k) });
     // "Akk m", "Dat pl" … before the phrase, shown after mistakes
-    explanations.push({ gap: first, text: `${CASE_SHORT[phrase.case]} ${GENDER_SHORT[noun.g]}` });
+    explanations.push({ gap: first, text: CASE_SHORT[phrase.case], detail: GENDER_SHORT[noun.g] });
   }
 
-  // Each {} of the frame becomes its phrase's gaps, each showing a hint that rules out no option
+  // Each {} of the frame becomes its phrase's gaps
   let n = 0;
   const template = frame.text.replace(/\{\}/g, () => phraseHints[n++]);
 
@@ -232,10 +334,21 @@ Two questions help every time: which case does the word's place in the sentence 
 
 If you made a mistake, the sentence stays when it's complete, with the case and gender of each noun phrase written in front of it, e.g. (Akk m) or (Dat pl); click Next (or press Enter) to go on. Without mistakes, the next sentence comes by itself.
 
+In the settings (gear icon) you choose the cases, forms, genders, how many noun phrases a sentence has, and which ein-words appear. A noun phrase that doesn't fit your choice (e.g. a Nominativ subject when you practise only Dativ) is filled in already, in its own colour, and not counted. The words you fill in take the colour of their case: Nominativ blue, Akkusativ orange, Dativ green, Genitiv purple.
+
 Your results are counted per case and form, separately for each noun phrase: a phrase counts as a success when all its words were right at the first try. Skipped sentences are not counted.`,
-  next(_settings, previous) {
-    let task = createTask();
-    for (let tries = 0; task.key === previous?.key && tries < 20; tries++) task = createTask();
-    return task;
+  settings: SETTINGS,
+  problem(values) {
+    return framesFor(readChoice(values)).length ? null
+      : 'No sentence fits this combination. Select more cases, forms, genders or sentence lengths.';
+  },
+  next(values, previous) {
+    let c = readChoice(values);
+    let frames = framesFor(c);
+    // Settings that allow no sentence (the dialog doesn't let them be kept): the defaults
+    if (!frames.length) { c = ANY; frames = framesFor(c); }
+    let task: GapFillTask | null = null;
+    for (let tries = 0; tries < 50 && (!task || task.key === previous?.key); tries++) task = createTask(c, frames) ?? task;
+    return task ?? createTask(ANY, framesFor(ANY))!;
   },
 };

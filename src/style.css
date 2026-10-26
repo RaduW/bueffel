@@ -17,6 +17,7 @@
   --case-akk: #d9480f;
   --case-dat: #1f8a4c;
   --case-gen: #4527a0;
+  --given: #8a6d1d;
   /* Background tint behind endings in the summary tables */
   --ending-tint: 18%;
   color-scheme: light;
@@ -45,6 +46,7 @@
     --case-akk: #e8590c;
     --case-dat: #2a9a5a;
     --case-gen: #5a3fd0;
+    --given: #c9a84a;
   --ending-tint: 0%;
   }
 }
@@ -69,6 +71,7 @@
   --case-akk: #e8590c;
   --case-dat: #2a9a5a;
   --case-gen: #5a3fd0;
+  --given: #c9a84a;
   --ending-tint: 0%;
 }
 
@@ -342,8 +345,15 @@ h1:has(.logo) { display: flex; align-items: center; gap: 10px; }
   border-bottom: 2px solid var(--accent);
 }
 .gap.solved { color: var(--ok); font-weight: 600; border-bottom-color: transparent; }
+.gap.solved.tone-nom, .explanation .tone-nom { color: var(--case-nom); }
+.gap.solved.tone-akk, .explanation .tone-akk { color: var(--case-akk); }
+.gap.solved.tone-dat, .explanation .tone-dat { color: var(--case-dat); }
+.gap.solved.tone-gen, .explanation .tone-gen { color: var(--case-gen); }
+/* Filled in from the start, not asked: plain weight, so it reads as part of the sentence */
+.gap.prefilled { color: var(--given); border-bottom-color: transparent; font-style: italic; }
+.inline-options { flex-direction: row; flex-wrap: wrap; gap: 6px 16px; }
 .gap-note { color: var(--muted); font-size: 0.75em; white-space: nowrap; }
-.explanation { color: var(--accent); font-size: 0.6em; font-weight: 600; white-space: nowrap; }
+.explanation { color: var(--muted); font-size: 0.6em; font-weight: 600; white-space: nowrap; }
 .card.gapfill .actions { margin-top: 20px; }
 .scores-scroll { overflow-x: auto; }
 .scores table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
