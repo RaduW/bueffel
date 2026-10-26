@@ -70,8 +70,8 @@ peer conflicts with workbox's Babel). `npm ci` works without the flag; a later
   short) + a "Grammar" list of links (`gapFillPage(def, { grammar: [PAGE] })`)
   to the global grammar pages (user's choice: no copy inside the dialog; leaving
   the exercise ends the current task like Skip)
-- Settings: the home page's gear opens `AppSettingsDialog` (theme only, user's
-  choice); each exercise's gear has its own settings with Reset statistics and
+- Settings: the home page's gear opens `AppSettingsDialog` (theme, and
+  auto-advance on correct answer: pref `bueffel-auto-advance`, default on); each exercise's gear has its own settings with Reset statistics and
   Clear history for that exercise
 - `src/ui/AboutDialog.tsx`: opened by the icon + "Büffel" title on the home page;
   the version comes from package.json (`__APP_VERSION__`, defined in vite.config.ts)
@@ -149,7 +149,8 @@ kept, but not used.
 
 - After a task solved without mistakes, it moves on automatically after 1 s;
   the Next button stays. After mistakes it stays until Next / Enter (both
-  exercises; user's choice). No auto-advance while a dialog is open.
+  exercises; user's choice). No auto-advance while a dialog is open, or when
+  turned off in the app settings.
 - Only finished tasks count, in every exercise; Skip or leaving changes
   nothing (not even the streak). The streak follows score groups in order.
 - Storage keys are prefixed `bueffel-`: other apps on raduw.github.io share

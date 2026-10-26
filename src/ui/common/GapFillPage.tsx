@@ -13,6 +13,7 @@ import { isFinished, pick, scoreResults, startTask, totalMistakes, type GapFillS
 import { defaultValues, emptySelection } from '../../core/gapfill/settings.ts'
 import type { GapFillExercise, SettingValues } from '../../core/gapfill/types.ts'
 import { tally } from '../../core/stats.ts'
+import { loadAutoAdvance } from '../../core/storage.ts'
 import { Header } from './Header.tsx'
 import type { GrammarPage } from '../grammar.ts'
 import { HelpDialog } from './HelpDialog.tsx'
@@ -56,6 +57,8 @@ export function GapFillPage<P>({ exercise, Prompt, grammar, onFinish }: Props<P>
   const [helpOpen, setHelpOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const nextButton = useRef<HTMLButtonElement>(null);
+  // App-wide setting, changed on the home page, so reading it once per visit is enough
+  const [autoAdvance] = useState(loadAutoAdvance);
 
   // Read by the auto-advance timer when it fires, not when it is started
   const dialogOpen = useRef(false);
@@ -98,9 +101,10 @@ export function GapFillPage<P>({ exercise, Prompt, grammar, onFinish }: Props<P>
 
   // Move on by itself shortly after a task is solved without mistakes; Next
   // still works for skipping the wait. Not behind an open dialog. After
-  // mistakes the task stays (with its explanations, if any) until Next
+  // mistakes the task stays (with its explanations, if any) until Next.
+  // Off in the app settings: every task stays until Next
   useEffect(() => {
-    if (!finished || !perfect) return;
+    if (!autoAdvance || !finished || !perfect) return;
     const timer = setTimeout(() => { if (!dialogOpen.current) nextTask(); }, ADVANCE_DELAY_MS);
     // nextTask only reads the latest state and settings (refs) and the fixed exercise
     return () => clearTimeout(timer);

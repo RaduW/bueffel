@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { applyTheme, loadTheme, saveTheme, type Theme } from '../core/storage.ts'
+import { applyTheme, loadAutoAdvance, loadTheme, saveAutoAdvance, saveTheme, type Theme } from '../core/storage.ts'
 import { Modal } from './common/Modal.tsx'
 
 const THEMES: { value: Theme; label: string }[] = [
@@ -8,15 +8,21 @@ const THEMES: { value: Theme; label: string }[] = [
   { value: 'dark', label: 'Dark' },
 ];
 
-// Settings for the whole app, opened from the home page: only the theme for
-// now. Statistics and history are reset in each exercise's own settings
+// Settings for the whole app, opened from the home page: the theme and
+// auto-advance. Statistics and history are reset in each exercise's own settings
 export function AppSettingsDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [theme, setTheme] = useState(loadTheme);
+  const [autoAdvance, setAutoAdvance] = useState(loadAutoAdvance);
 
   function changeTheme(t: Theme) {
     setTheme(t);
     applyTheme(t);
     saveTheme(t);
+  }
+
+  function changeAutoAdvance(on: boolean) {
+    setAutoAdvance(on);
+    saveAutoAdvance(on);
   }
 
   return (
@@ -32,6 +38,13 @@ export function AppSettingsDialog({ open, onClose }: { open: boolean; onClose: (
             </label>
           ))}
         </div>
+      </fieldset>
+      <fieldset>
+        <legend>Practice</legend>
+        <label>
+          <input type="checkbox" checked={autoAdvance} onChange={e => changeAutoAdvance(e.target.checked)} />
+          Auto advance on correct answer
+        </label>
       </fieldset>
       <div className="dialog-actions">
         <span></span>

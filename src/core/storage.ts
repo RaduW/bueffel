@@ -51,6 +51,17 @@ export function savePref(name: string, value: unknown) {
   } catch { /* storage unavailable: kept for this visit only */ }
 }
 
+// App-wide: move on by itself after a task solved without mistakes (on by default)
+const AUTO_ADVANCE_PREF = 'auto-advance';
+
+export function loadAutoAdvance(): boolean {
+  return loadPref<boolean>(AUTO_ADVANCE_PREF, true) !== false;
+}
+
+export function saveAutoAdvance(on: boolean) {
+  savePref(AUTO_ADVANCE_PREF, on);
+}
+
 // 'system' follows the device's light/dark setting; 'light' and 'dark' override it
 export type Theme = 'system' | 'light' | 'dark'
 
