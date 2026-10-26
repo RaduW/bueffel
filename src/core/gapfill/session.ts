@@ -1,5 +1,5 @@
-// Working through one task: the current gap, wrong picks, and the scores at
-// the end. Functions return new objects, so they can back React state directly.
+// Working through one task: which gaps are solved, wrong picks, and the scores
+// at the end. Functions return new objects, so they can back React state directly.
 
 import type { ScoreResult } from '../scores.ts'
 import { parseTemplate, type Segment } from './template.ts'
@@ -8,13 +8,15 @@ import type { Explanation, GapFillTask } from './types.ts'
 export interface GapFillState {
   task: GapFillTask
   segments: Segment[]
-  // The gap being filled; equal to the number of gaps once all are solved.
-  // Given gaps are never current
-  current: number
-  // Options already tried and found wrong, for the current gap
-  wrong: string[]
+  // Per gap: solved (given gaps count as solved from the start)
+  solved: boolean[]
+  // Per gap: options already tried and found wrong
+  wrong: string[][]
   // Wrong picks per gap
   mistakes: number[]
+  // The first gap still to solve, in order; equal to the number of gaps once
+  // all are solved. With options shown one gap at a time, the one being filled
+  current: number
   // Set by the first pick
   touched: boolean
 }
@@ -25,27 +27,19 @@ export function startTask(task: GapFillTask): GapFillState {
   if (gaps !== task.gaps.length) {
     throw new Error(`Task ${task.key}: template has ${gaps} gaps, but ${task.gaps.length} are defined`);
   }
-  return { task, segments, current: nextAsked(task, 0), wrong: [], mistakes: task.gaps.map(() => 0), touched: false };
+  const solved = task.gaps.map(g => !!g.given);
+  return {
+    task, segments, solved,
+    wrong: task.gaps.map(() => []),
+    mistakes: task.gaps.map(() => 0),
+    current: firstOpen(solved),
+    touched: false,
+  };
 }
 
-// The first gap from `from` on that is asked (not given)
-function nextAsked(task: GapFillTask, from: number): number {
-  let i = from;
-  while (i < task.gaps.length && task.gaps[i].given) i++;
-  return i;
-}
-
-// A gap shows its answer: solved, or given from the start
-export function isFilled(s: GapFillState, index: number): boolean {
-  return index < s.current || !!s.task.gaps[index]?.given;
-}
-
-// A filled gap whose score group is complete: every gap of the group is
-// filled. Its tone (e.g. the case) can show now without giving it away for
-// the group's remaining gaps. A gap in no group: once filled
-export function isGroupComplete(s: GapFillState, index: number): boolean {
-  const groups = s.task.scores.filter(g => g.gaps.includes(index));
-  return isFilled(s, index) && groups.every(g => g.gaps.every(i => isFilled(s, i)));
+function firstOpen(solved: boolean[]): number {
+  const i = solved.indexOf(false);
+  return i < 0 ? solved.length : i;
 }
 
 export function isFinished(s: GapFillState): boolean {
@@ -56,6 +50,19 @@ export function totalMistakes(s: GapFillState): number {
   return s.mistakes.reduce((a, b) => a + b, 0);
 }
 
+// A gap shows its answer: solved, or given from the start
+export function isFilled(s: GapFillState, index: number): boolean {
+  return !!s.solved[index];
+}
+
+// A filled gap whose score group is complete: every gap of the group is
+// filled. Its tone (e.g. the case) can show now without giving it away for
+// the group's remaining gaps. A gap in no group: once filled
+export function isGroupComplete(s: GapFillState, index: number): boolean {
+  const groups = s.task.scores.filter(g => g.gaps.includes(index));
+  return isFilled(s, index) && groups.every(g => g.gaps.every(i => isFilled(s, i)));
+}
+
 export interface PickOutcome {
   state: GapFillState
   result: 'correct' | 'wrong' | 'ignored'
@@ -63,19 +70,21 @@ export interface PickOutcome {
   finished: boolean
 }
 
-// Pick option opt for the current gap. Repeating a wrong option, or picking
-// after the task is finished, is ignored.
-export function pick(s: GapFillState, opt: string): PickOutcome {
-  const gap = s.task.gaps[s.current];
-  if (!gap || s.wrong.includes(opt) || !gap.options.includes(opt)) {
+// Pick option opt for gap `index`. Picking for a solved (or given) gap,
+// repeating a wrong option, or an option the gap doesn't have is ignored.
+export function pick(s: GapFillState, index: number, opt: string): PickOutcome {
+  const gap = s.task.gaps[index];
+  if (!gap || s.solved[index] || s.wrong[index].includes(opt) || !gap.options.includes(opt)) {
     return { state: s, result: 'ignored', finished: false };
   }
   if (opt === gap.answer) {
-    const state = { ...s, current: nextAsked(s.task, s.current + 1), wrong: [], touched: true };
+    const solved = s.solved.map((v, i) => v || i === index);
+    const state = { ...s, solved, current: firstOpen(solved), touched: true };
     return { state, result: 'correct', finished: isFinished(state) };
   }
-  const mistakes = s.mistakes.map((m, i) => i === s.current ? m + 1 : m);
-  return { state: { ...s, wrong: [...s.wrong, opt], mistakes, touched: true }, result: 'wrong', finished: false };
+  const wrong = s.wrong.map((w, i) => i === index ? [...w, opt] : w);
+  const mistakes = s.mistakes.map((m, i) => i === index ? m + 1 : m);
+  return { state: { ...s, wrong, mistakes, touched: true }, result: 'wrong', finished: false };
 }
 
 // The explanations to show before each gap, once a task is finished with

@@ -15,7 +15,7 @@ Decided to move from plain TypeScript + DOM to React (Vite + TS), because more
 exercise types are coming.
 
 1. **Done:** framework-independent logic in `src/core/` (grammar data, nouns,
-   exercises, question drawing/answering, stats, settings, storage, history).
+   exercise definitions, stats, storage, history).
    Functions there return new objects instead of mutating, so they can back
    React state (`useState`/`useReducer`) directly.
 2. **Done:** UI rebuilt in React (`src/ui/`).
@@ -25,8 +25,9 @@ exercise types are coming.
    `.compact`. JS decides (not CSS media queries) because the layouts place the
    result and Skip/Next differently. Switching layouts keeps all state.
 
-Exercise-specific components can come once there is a second kind of exercise;
-today every exercise is "fill the slots by choosing options" (`QuestionCard`).
+Both exercises are gapFill exercises (see below) on the same page
+(`src/ui/common/GapFillPage.tsx`); an exercise adds its own components only
+where it differs (declension: the prompt above the phrase, the tables as help).
 
 `@vitejs/plugin-react` was installed with `--legacy-peer-deps` (an optional Babel
 peer conflicts with workbox's Babel). `npm ci` works without the flag; a later
@@ -37,7 +38,6 @@ peer conflicts with workbox's Babel). `npm ci` works without the flag; a later
 - `src/core/grammar.ts`: cases, genders, article/ending tables, adjectives
 - `src/core/nouns.ts`: noun pools, `nounForm`
 - `src/core/exercises.ts`: exercise definitions (`build` slots, `sample` table cells)
-- `src/core/question.ts`: `createQuestion`, `answer`
 - `src/core/scores.ts`: `ScoreResult` {tags, success, mistakes}, `Scoreboard`
   (per tag combination: attempts, successes, mistakes), `totals`. Every exercise
   reports one result per score group of a finished task (declension question:
@@ -51,9 +51,6 @@ peer conflicts with workbox's Babel). `npm ci` works without the flag; a later
 - `src/core/history.ts`: IndexedDB `bueffel-history` v2, store `results`, one
   record per [date, exercise] with a `scores` scoreboard. v1's `days` store is
   deleted on upgrade. `clearHistory(exercise)` clears one exercise
-- `src/ui/useExerciseProgress.ts`: the one mechanism both exercises use: load/save,
-  `addResults` (progress + history), `resetStats`, `deleteHistory`
-- `src/core/settings.ts`: the declension exercise's settings
 - `src/ui/App.tsx`: picks the page from the URL hash (`useHashRoute`): `#/<route>`
   of an exercise, otherwise the home page (`Home.tsx`)
 - `src/ui/exercises.ts`: the exercises on the home page (route, title, component).
@@ -62,26 +59,33 @@ peer conflicts with workbox's Babel). `npm ci` works without the flag; a later
   A new exercise = a new entry here plus its folder
 - Settings: the home page's gear opens `AppSettingsDialog` (theme only, user's
   choice); each exercise's gear has its own settings with Reset statistics and
-  Clear history for that exercise (`HistoryControls.tsx` shared)
+  Clear history for that exercise
 - `src/ui/AboutDialog.tsx`: opened by the icon + "BÃ¼ffel" title on the home page;
   the version comes from package.json (`__APP_VERSION__`, defined in vite.config.ts)
-- `src/ui/`: shared `Header` (title, optional back button, actions), `StatsBar`
-  (the shown/success/errors/accuracy/streak tally, used by both exercises), `Modal`
-  (native `<dialog>`), `useMediaQuery`, `icons`
-- `src/ui/declension/Declension.tsx`: the declension exercise: state (settings,
-  stats, question), auto-advance, wide or compact layout; `onFinish` goes home
-  (a started, unfinished question counts like Skip)
-- `src/ui/declension/`: `QuestionCard`, `ResultBanner`, `Breakdown` (wide layout),
-  `SettingsDialog`, `TablesDialog`
+- `src/ui/common/` (user's request: UI shared by the exercises): `GapFillPage`
+  (state, auto-advance, Enter, wide/compact layout; `gapFillPage(def, { Prompt,
+  Help })` makes the page component; leaving goes home, an unfinished task counts
+  like Skip), `Sentence`, `OptionRow`, `ResultBanner`, `ScorePanel` (groups by
+  `scoreColumns`), `SettingsDialog` (drawn from the `SettingDef`s, plus Reset
+  statistics / Clear history), `HelpDialog`, `HistoryControls`, `Header`,
+  `StatsBar`, `Modal` (native `<dialog>`), `icons`, `useMediaQuery`, `layout`
+  (`COMPACT_QUERY`, `ADVANCE_DELAY_MS`), `useExerciseProgress` (the one storage
+  mechanism: load/save, `addResults` = progress + history, `resetStats`,
+  `deleteHistory`)
+- `src/ui/declension/`: `DeclensionPrompt` (case badge, exercise, noun + gender
+  + adjective), `TablesDialog` + `DeclensionHelp` (the tables of the selected
+  exercises, as the help)
 - `src/main.tsx`: entry for `index.html`
 
 ## gapFill (reusable exercise kind)
 
-Fill a sentence one gap at a time, picking each word from options; one option
-row at a time. Built so the same page serves many exercises (declension, verbs â€¦).
+Fill a sentence (or phrase) gap by gap, picking each word from options. Built so
+the same page serves many exercises (declension, verbs â€¦).
 
-- `src/core/gapfill/types.ts`: `GapFillExercise` { id, title, info (help text,
-  paragraphs split by blank lines), settings? (`SettingDef[]`: boolean, choice,
+- `src/core/gapfill/types.ts`: `GapFillExercise<P>` { id, title, info? (help text,
+  paragraphs split by blank lines), options? ('current' = one option row, gaps in
+  order; 'all' = every row at once, any order: declension), scoreColumns? / scoreLabel?
+  (results table: declension groups by exercise, shown by name), settings? (`SettingDef[]`: boolean, choice,
   multi; the page draws the dialog from them), problem?(settings) (dialog stays
   open while non-null), next(settings, previous) -> task }. `settings.ts`:
   `defaultValues`, `multiValue`, `choiceValue`, `emptySelection`. A task is plain data: `template`
@@ -94,10 +98,16 @@ row at a time. Built so the same page serves many exercises (declension, verbs â
   before that dark grey `--pending`, so the colour doesn't give the case away)), `scores` ({tags, gaps}: one group per asked noun phrase),
   `explanations?` ({gap, text, detail?}: text "Dat" in the gap's tone, detail
   "pl" grey (user: colour only the case, not the gender), shown in brackets
-  before that gap only after a task finished with mistakes).
+  before that gap only after a task finished with mistakes), `prompt?` (data of
+  type P for the exercise's Prompt component).
   Definitions know nothing about the UI and don't drive gap-to-gap progress.
-- `session.ts`: `startTask`, `pick`, `scoreResults` (a group succeeds when its
-  gaps had no wrong pick); `scoreboard.ts`: totals per tag combination.
+- `session.ts`: state per gap (solved, wrong); `startTask`, `pick(state, gap,
+  opt)`, `scoreResults` (a group succeeds when its gaps had no wrong pick).
+- `src/core/declension/declension.ts`: the declension exercise (one noun phrase,
+  all options at once). Settings exercises / noun groups / genders / cases
+  (same saved shape as before, key `bueffel-ex-declension-v1`); template = hints
+  of the phrase ("{d__} {alt__} {Mann__}"), tone = the case; one score group
+  tagged exercise/case/gender.
 - `template.ts`: `parseTemplate`, `hintFor` (hint = common prefix of the options
   + "__", so it never rules out an option: articles show "d__"), `capitalize`.
 - `src/core/sentences/declensionSentences.ts`: first definition: 44 sentence
@@ -112,14 +122,10 @@ row at a time. Built so the same page serves many exercises (declension, verbs â
   other phrases are given (user's choice (b): pre-filled in a distinct colour).
   Frames need a selected length and at least one asked phrase. No n-nouns yet (user:
   add later as an option); frames needing ein/kein or contractions are left out.
-- `src/ui/gapfill/GapFillPage.tsx` (+ Sentence, OptionRow, HelpDialog, ScorePanel);
-  `gapFillPage(def)` makes the component for `src/ui/exercises.ts`.
 - Decided with the user: help only behind the ? button; skipped tasks are not
   scored (and don't touch the header tally or streak); after a task with
   mistakes there is no auto-advance (explanations shown, Next / Enter to go on).
-- Not yet: moving the old declension exercise onto
-  gapFill (it is untouched; `ResultBanner` is imported from it, and
-  `COMPACT_QUERY` exists in both `src/ui/layout.ts` and `Declension.tsx`).
+- Later (user has a plan): offering the declension tables in the sentences exercise.
 
 ## Icon
 
@@ -130,8 +136,9 @@ kept, but not used.
 
 ## Behaviour to keep
 
-- After a question is solved, it moves on automatically after 1 s; the Next
-  button stays. No auto-advance while a dialog is open.
+- After a task solved without mistakes, it moves on automatically after 1 s;
+  the Next button stays. After mistakes it stays until Next / Enter (both
+  exercises; user's choice). No auto-advance while a dialog is open.
 - Only finished tasks count, in every exercise; Skip or leaving changes
   nothing (not even the streak). The streak follows score groups in order.
 - Storage keys are prefixed `bueffel-`: other apps on raduw.github.io share

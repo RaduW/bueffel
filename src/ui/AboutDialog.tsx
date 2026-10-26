@@ -1,4 +1,4 @@
-import { Modal } from './Modal.tsx'
+import { Modal } from './common/Modal.tsx'
 
 interface Props {
   open: boolean

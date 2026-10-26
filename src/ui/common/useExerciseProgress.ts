@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
-import { clearHistory, recordResults } from '../core/history.ts'
-import type { ScoreResult } from '../core/scores.ts'
-import { emptyProgress, withResults } from '../core/stats.ts'
-import { loadExercise, saveExercise } from '../core/storage.ts'
+import { clearHistory, recordResults } from '../../core/history.ts'
+import type { ScoreResult } from '../../core/scores.ts'
+import { emptyProgress, withResults } from '../../core/stats.ts'
+import { loadExercise, saveExercise } from '../../core/storage.ts'
 
 // An exercise's settings and statistics, kept in localStorage under its id,
 // and its daily history (IndexedDB). The same for every exercise.

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { applyTheme, loadTheme, saveTheme, type Theme } from '../core/storage.ts'
-import { Modal } from './Modal.tsx'
+import { Modal } from './common/Modal.tsx'
 
 const THEMES: { value: Theme; label: string }[] = [
   { value: 'system', label: 'Device' },

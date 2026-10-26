@@ -48,7 +48,7 @@ One-time setup: in the repository on GitHub, go to **Settings → Pages** and se
 
 ## Phones
 
-The page adapts to the screen. On phones (and in windows narrower than 640px) it switches to a compact layout with large tap targets and **Skip** / **Next** in a bar at the bottom of the screen, within thumb reach. The compact layout leaves out the per-exercise table, and **Reset statistics** is in the settings sheet instead. Phones in landscape get the compact layout too. Switching layouts (turning the phone, resizing the window) keeps the current question and statistics.
+The page adapts to the screen. On phones (and in windows narrower than 640px) it switches to a compact layout with large tap targets and **Skip** / **Next** in a bar at the bottom of the screen, within thumb reach. **Reset statistics** and **Clear history** move to the bottom of the settings sheet. Phones in landscape get the compact layout too. Switching layouts (turning the phone, resizing the window) keeps the current question and statistics.
 
 ## Installing it as an app
 
@@ -66,7 +66,7 @@ The service worker only runs in production builds (`npm run build` / `npm run pr
 
 The start page lists the exercises as cards: **Declension practice** and **Declension in sentences**. Click one to open it. Clicking the icon or the name **Büffel** at the top opens the **About** dialog (what the app is, privacy, version, source link); the gear icon on the start page opens the app settings (the theme: device, light or dark). The back arrow next to the exercise's title finishes it and returns to the start page; leaving a question you've already started counts like **Skip** (it isn't counted). Each page has its own address (`#/declension`, `#/sentences`), so the browser's Back button and bookmarks work.
 
-**Deklination**
+**Declension practice**
 
 1. Click the gear icon next to the title to open **Settings**, and choose:
    - **Exercises:** one or more of
@@ -78,16 +78,15 @@ The start page lists the exercises as cards: **Declension practice** and **Decle
    - **Nouns:** the core set (Mann, Kind, Frau, Leute), more nouns, or n-nouns (Junge, Student …)
    - **Gender / number:** any mix of maskulin, neutrum, feminin and Plural (e.g. only maskulin + Plural)
    - **Cases:** Nominativ, Akkusativ, Dativ, Genitiv
-   - **Appearance:** **Device** (default) follows your device's light/dark setting; **Light** or **Dark** overrides it.
 
    Close the dialog with **Done**, Escape, or a click outside it. Changes are saved straight away. The dialog stays open, with a message saying what's missing, until the settings allow at least one question: at least one exercise, noun group, gender and case, and nouns of the chosen genders in the chosen groups.
-2. Each question shows a case, a noun with its gender (or *Plural*), and an adjective if the exercise uses one.
-3. Click the right form in each row of options:
+2. Each question shows a case, a noun with its gender (or *Plural*), and an adjective if the exercise uses one. Below it is the phrase with a gap per word, each showing how the word starts (*d__ alt__ Mann__*).
+3. Click the right form in each row of options, in any order:
    - **Green** means correct, and that row is locked.
    - **Red** means wrong. Keep trying until you find the right one.
-4. When every word is solved, click **Next** or press **Enter**.
+4. Once every word is solved, the phrase takes the colour of its case. Without mistakes the next question comes after a second (click **Next** or press **Enter** to go on straight away); after a mistake the question stays until you click **Next** or press **Enter**.
 
-**Skip** moves to a new question. Skipping a question you've already started resets your streak.
+**Skip** moves to a new question; a skipped question isn't counted. The **?** button shows the declension tables of the selected exercises. The **Results** table counts questions per exercise.
 
 **Declension in sentences**
 
@@ -131,12 +130,12 @@ To look at it, open the browser's developer tools: **Application → IndexedDB �
 | `src/core/` | Logic without UI: declension tables, nouns, exercises, questions, statistics, settings, storage |
 | `src/core/scores.ts` | Results per tag combination, shared by all exercises |
 | `src/core/history.ts` | Daily history in IndexedDB |
-| `src/ui/useExerciseProgress.ts` | Loads and saves an exercise's settings and statistics, and writes its history |
-| `src/ui/` | Shared React components: `App.tsx` (shows the start page or an exercise, by URL hash), `Home.tsx` (start page: one card per exercise), `exercises.ts` (the list of exercises), `Header`, `Modal` |
-| `src/ui/declension/` | The Deklination exercise; `Declension.tsx` holds its state and lays out the page |
+| `src/ui/` | `App.tsx` (shows the start page or an exercise, by URL hash), `Home.tsx` (start page: one card per exercise), `exercises.ts` (the list of exercises), About and app settings dialogs |
+| `src/ui/common/` | UI shared by the exercises: the exercise page (`GapFillPage`), sentence, options, results, settings and help dialogs, header, tally, and `useExerciseProgress` (saves settings and statistics, writes the history) |
+| `src/ui/declension/` | What only Declension practice has: the prompt above the phrase (case, noun, gender, adjective) and the declension tables |
+| `src/core/declension/` | Declension practice as a gapFill exercise: settings and question drawing |
 | `src/core/gapfill/` | gapFill, a reusable kind of exercise (fill a sentence gap by gap from options): the exercise interface, the template parser, the progress and scoring logic |
 | `src/core/sentences/` | gapFill exercise definitions; `declensionSentences.ts` is "Declension in sentences" |
-| `src/ui/gapfill/` | The page for any gapFill exercise: sentence, options, help dialog, results |
 | `src/main.tsx` | Entry: loads the styles and renders `App` |
 | `src/style.css` | Styling (light and dark mode); the compact layout's rules are at the end, under `.compact` |
 | `public/favicon.svg` | Browser tab icon |

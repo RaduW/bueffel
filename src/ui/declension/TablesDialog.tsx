@@ -1,13 +1,20 @@
+import { selectedExercises } from '../../core/declension/declension.ts'
 import { exerciseById, type Exercise } from '../../core/exercises.ts'
 import { CASES, GENDER_HEADER, GENDERS, type CaseIndex, type Gender } from '../../core/grammar.ts'
-import { Modal } from '../Modal.tsx'
-import { useMediaQuery } from '../useMediaQuery.ts'
+import { Modal } from '../common/Modal.tsx'
+import { useMediaQuery } from '../common/useMediaQuery.ts'
+import type { HelpProps } from '../common/GapFillPage.tsx'
 
 interface Props {
   open: boolean
   exerciseIds: string[]
   compact: boolean
   onClose: () => void
+}
+
+// The declension exercise's help: the tables of the exercises selected in its settings
+export function DeclensionHelp({ open, compact, settings, onClose }: HelpProps) {
+  return <TablesDialog open={open} exerciseIds={selectedExercises(settings)} compact={compact} onClose={onClose} />;
 }
 
 // One table per selected exercise, like the ones in "German Declination.md".

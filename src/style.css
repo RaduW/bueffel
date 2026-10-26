@@ -200,19 +200,6 @@ fieldset label { display: inline-flex; align-items: center; gap: 6px; cursor: po
 .gender.p { color: var(--p); }
 .adjective { font-style: italic; color: var(--muted); }
 
-.phrase {
-  text-align: center;
-  font-size: 1.5rem;
-  margin: 20px 0;
-  min-height: 2.2rem;
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-.phrase .blank { color: var(--muted); }
-.phrase .filled { color: var(--ok); font-weight: 600; }
-
 .slot { margin-top: 14px; }
 .slot-label { color: var(--muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
 .options { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -281,10 +268,6 @@ dialog.tables-dialog { width: min(840px, calc(100vw - 32px)); }
   border-radius: 3px;
 }
 
-.breakdown table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-.breakdown th, .breakdown td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); }
-.breakdown th { color: var(--muted); font-weight: 600; }
-.breakdown td:not(:first-child), .breakdown th:not(:first-child) { text-align: right; font-variant-numeric: tabular-nums; }
 .actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px; }
 
 @media (max-width: 520px) {
@@ -411,7 +394,6 @@ h1:has(.logo) { display: flex; align-items: center; gap: 10px; }
 .compact .card { padding: 16px 14px; border-radius: 12px; margin: 0; }
 .compact .exercise-name { font-size: 0.75rem; }
 .compact .given { font-size: 1.35rem; gap: 8px; margin-top: 8px; }
-.compact .phrase { font-size: 1.25rem; margin: 12px 0 4px; min-height: 1.9rem; }
 .compact .sentence { font-size: 1.3rem; margin: 0 0 8px; }
 /* Notes are hard to read small on a phone: bigger gender signs and case explanations */
 .compact .gap-note { font-size: 1.1em; }

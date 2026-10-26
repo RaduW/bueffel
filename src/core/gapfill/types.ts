@@ -1,12 +1,23 @@
-// gapFill: a sentence is completed one gap at a time, by picking each gap's
-// word from a set of options. An exercise definition only provides tasks as
-// plain data; moving from gap to gap and scoring are generic (session.ts).
+// gapFill: a sentence (or phrase) is completed gap by gap, by picking each
+// gap's word from a set of options. An exercise definition only provides tasks
+// as plain data; answering and scoring are generic (session.ts).
+//
+// P: the task's prompt, data the page shows above the sentence with a
+// component of the exercise's own (e.g. the case and noun to decline)
 
-export interface GapFillExercise {
+export interface GapFillExercise<P = unknown> {
   id: string
   title: string
-  // Explains the exercise; shown by the help button. Paragraphs are separated by blank lines
-  info: string
+  // Explains the exercise; shown by the help button unless the page is given
+  // its own help. Paragraphs are separated by blank lines
+  info?: string
+  // 'current' (default): only the options of the next gap, filled in order;
+  // 'all': the options of every gap at once, filled in any order
+  options?: 'current' | 'all'
+  // The tags the results table groups by, in this order; default: all tags
+  scoreColumns?: string[]
+  // How a tag value is shown in the results table (e.g. an id as a name); default: as is
+  scoreLabel?(tag: string, value: string): string
   // What the learner can choose (cases, forms …), shown in the settings dialog
   settings?: SettingDef[]
   // Why no task can be made with these settings, or null if one can. The
@@ -14,15 +25,16 @@ export interface GapFillExercise {
   problem?(settings: SettingValues): string | null
   // The next task to show. previous: the last task, to avoid repeating it.
   // Must return a task even for settings with a problem (e.g. by using the defaults)
-  next(settings: SettingValues, previous?: GapFillTask): GapFillTask
+  next(settings: SettingValues, previous?: GapFillTask<P>): GapFillTask<P>
 }
 
-export interface GapFillTask {
+export interface GapFillTask<P = unknown> {
   // Identifies the task, to avoid showing the same one twice in a row
   key: string
   // The sentence, with each gap in braces holding its hint:
   // "{D__} {alt__} {Mann__} sieht {d__} {klein__} {Hund__}."
-  // Gaps are filled in this order, and matched to `gaps` by position
+  // Gaps are matched to `gaps` by position (and filled in this order, unless
+  // the exercise shows all options at once)
   template: string
   gaps: Gap[]
   // What the task scores, e.g. one group per noun phrase. A group succeeds
@@ -31,6 +43,8 @@ export interface GapFillTask {
   // Shown when the task was finished with mistakes, each before its gap,
   // e.g. the case and gender of a noun phrase: { gap: 0, text: 'Nom', detail: 'm' }
   explanations?: Explanation[]
+  // Shown above the sentence by the exercise's prompt component
+  prompt?: P
 }
 
 export interface Explanation {

@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { AboutDialog } from './AboutDialog.tsx'
 import { AppSettingsDialog } from './AppSettingsDialog.tsx'
 import { EXERCISE_PAGES } from './exercises.ts'
-import { Header } from './Header.tsx'
-import { SettingsIcon } from './icons.tsx'
+import { Header } from './common/Header.tsx'
+import { SettingsIcon } from './common/icons.tsx'
 import { navigate } from './useHashRoute.ts'
 
 // The start page: one card per exercise, showing only its title

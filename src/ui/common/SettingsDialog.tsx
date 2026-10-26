@@ -1,6 +1,6 @@
 import type { SettingDef, SettingValues } from '../../core/gapfill/types.ts'
-import { HistoryField, useClearHistoryButton } from '../HistoryControls.tsx'
-import { Modal } from '../Modal.tsx'
+import { HistoryField, useClearHistoryButton } from './HistoryControls.tsx'
+import { Modal } from './Modal.tsx'
 
 interface Props {
   open: boolean

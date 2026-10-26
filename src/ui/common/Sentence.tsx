@@ -7,7 +7,8 @@ import { explanationsByGap, isFilled, isGroupComplete, type GapFillState } from 
 // task's explanations appear in brackets before their gaps: the text (the
 // case) in the gap's tone, the detail (the gender) uncoloured. A gap's note
 // (e.g. a noun's gender) always follows it, in brackets
-export function Sentence({ state }: { state: GapFillState }) {
+// highlightCurrent: mark the gap being filled (options shown one gap at a time)
+export function Sentence({ state, highlightCurrent }: { state: GapFillState; highlightCurrent: boolean }) {
   const explanations = explanationsByGap(state);
   return (
     <p className="sentence">
@@ -15,7 +16,7 @@ export function Sentence({ state }: { state: GapFillState }) {
         if (seg.kind === 'text') return <span key={i}>{seg.text}</span>;
         const { answer, note, given, tone } = state.task.gaps[seg.index];
         const filled = isFilled(state, seg.index);
-        const current = seg.index === state.current;
+        const current = highlightCurrent && seg.index === state.current;
         const cls = given ? ' prefilled'
           : !filled ? (current ? ' current' : '')
           : !isGroupComplete(state, seg.index) ? ' solved pending'

@@ -1,4 +1,4 @@
-import { pct, type Tally } from '../core/stats.ts'
+import { pct, type Tally } from '../../core/stats.ts'
 
 // The tally in the header: puzzles shown (score groups: a declension question,
 // a noun phrase in a sentence), successes, errors, accuracy, streak
