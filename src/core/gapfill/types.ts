@@ -25,7 +25,7 @@ export interface GapFillTask {
   // when its gaps were all solved without a wrong pick
   scores: ScoreGroup[]
   // Shown when the task was finished with mistakes, each before its gap,
-  // e.g. the case of a noun phrase: { gap: 0, text: 'Nominativ Maskulin' }
+  // e.g. the case of a noun phrase: { gap: 0, text: 'Nom m' }
   explanations?: Explanation[]
 }
 

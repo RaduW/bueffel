@@ -4,8 +4,8 @@
 import type { Explanation, Gap, GapFillExercise, GapFillTask, ScoreGroup } from '../gapfill/types.ts'
 import { capitalize, hintFor } from '../gapfill/template.ts'
 import {
-  ADJ_ENDING, CASES, caseIndex, DEF_ARTICLE, DEF_OPTIONS, EIN_ENDING, EIN_WORDS_PL, EIN_WORDS_SG, ENDING_OPTIONS,
-  GENDER_HEADER, type CaseId, type CaseIndex, type Gender,
+  ADJ_ENDING, caseIndex, DEF_ARTICLE, DEF_OPTIONS, EIN_ENDING, EIN_WORDS_PL, EIN_WORDS_SG, ENDING_OPTIONS,
+  type CaseId, type CaseIndex, type Gender,
 } from '../grammar.ts'
 import { nounForm, type Noun } from '../nouns.ts'
 import { pick } from '../random.ts'
@@ -151,6 +151,7 @@ const ADJ_TABLE = { def: ADJ_ENDING.weak, ein: ADJ_ENDING.mixed, none: ADJ_ENDIN
 // for the plain text symbol, not the coloured emoji some phones show for ♂ and ♀
 const GENDER_SIGN: Record<Gender, string> = { m: '♂\uFE0E', f: '♀\uFE0E', n: '⚲\uFE0E', p: '⚤\uFE0E' };
 const CASE_TAG: Record<CaseId, string> = { nom: 'Nom', akk: 'Akk', dat: 'Dat', gen: 'Gen' };
+const GENDER_SHORT: Record<Gender, string> = { m: 'm', n: 'n', f: 'f', p: 'pl' };
 
 // The gaps of one noun phrase, in the pattern's form: (article) (adjective) noun.
 // einWord: which of ein/kein/mein … to use, for the ein-word patterns
@@ -210,8 +211,8 @@ function createTask(): GapFillTask {
     gaps.push(...pg);
     phraseHints.push(pg.map(g => `{${hintFor(g.options)}}`).join(' '));
     scores.push({ tags: { case: CASE_TAG[phrase.case], pattern: pattern.id }, gaps: pg.map((_, k) => first + k) });
-    // "Akkusativ Maskulin", "Dativ Plural" … before the phrase, shown after mistakes
-    explanations.push({ gap: first, text: `${CASES[ci].name} ${GENDER_HEADER[noun.g]}` });
+    // "Akk m", "Dat pl" … before the phrase, shown after mistakes
+    explanations.push({ gap: first, text: `${CASE_TAG[phrase.case]} ${GENDER_SHORT[noun.g]}` });
   }
 
   // Each {} of the frame becomes its phrase's gaps, each showing a hint that rules out no option
@@ -231,7 +232,7 @@ der Mann (definite article + noun), einen Mann (ein, kein, mein … + noun), alt
 
 Two questions help every time: which case does the word's place in the sentence need, and does the article already show it? After der, die, das … the adjective only takes -e or -en. After ein, kein, mein … it does too, except where the article has no ending (ein alter Mann, ein kleines Kind). Without an article, the adjective shows the case itself.
 
-If you made a mistake, the sentence stays when it's complete, with the case and gender (or Plural) of each noun phrase written in front of it; click Next (or press Enter) to go on. Without mistakes, the next sentence comes by itself.
+If you made a mistake, the sentence stays when it's complete, with the case and gender of each noun phrase written in front of it, e.g. (Akk m) or (Dat pl); click Next (or press Enter) to go on. Without mistakes, the next sentence comes by itself.
 
 Your results are counted per case and form, separately for each noun phrase: a phrase counts as a success when all its words were right at the first try. Skipped sentences are not counted.`,
   next(_settings, previous) {
