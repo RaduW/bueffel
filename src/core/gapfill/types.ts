@@ -8,8 +8,8 @@
 export interface GapFillExercise<P = unknown> {
   id: string
   title: string
-  // Explains the exercise; shown by the help button unless the page is given
-  // its own help. Paragraphs are separated by blank lines
+  // Explains the exercise briefly; shown by the help button. Paragraphs are
+  // separated by blank lines
   info?: string
   // 'current' (default): only the options of the next gap, filled in order;
   // 'all': the options of every gap at once, filled in any order

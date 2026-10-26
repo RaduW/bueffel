@@ -237,7 +237,6 @@ button.primary { background: var(--accent); color: var(--surface); border-color:
 button.danger { color: var(--bad); }
 
 /* Summary tables: endings in their gender's colour, coloured headers */
-dialog.tables-dialog { width: min(840px, calc(100vw - 32px)); }
 .tables h2 { font-size: 1rem; color: var(--muted); margin: 16px 0 8px; }
 .table-scroll {
   overflow-x: auto;
@@ -295,10 +294,10 @@ h1:has(.logo) { display: flex; align-items: center; gap: 10px; }
 .about-logo { width: 56px; height: 56px; border-radius: 22%; flex: none; }
 .help-text a { color: var(--accent); }
 .logo { width: 1.4em; height: 1.4em; border-radius: 22%; }
-.tagline { color: var(--muted); margin: 0 0 16px; }
+.tagline { color: var(--muted); margin: 0 0 8px; }
+.home-section { color: var(--muted); font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; margin: 20px 0 8px; }
 .exercise-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
 .exercise-card {
-  display: block;
   padding: 20px 24px;
   background: var(--surface);
   border: 1px solid var(--border);
@@ -308,7 +307,19 @@ h1:has(.logo) { display: flex; align-items: center; gap: 10px; }
   font-weight: 700;
   text-decoration: none;
   transition: border-color 0.12s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
+.exercise-card svg { color: var(--muted); flex: none; }
+
+/* Grammar: chips choosing what a page shows; the help dialog's links to grammar pages */
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px; }
+.chip { border-radius: 999px; padding: 4px 12px; font-size: 0.9rem; }
+.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--surface); }
+.grammar-links { list-style: none; margin: 0; padding: 0; }
+.grammar-links a { display: inline-block; padding: 4px 0; color: var(--accent); text-decoration: none; }
+.grammar-links a:hover { text-decoration: underline; }
 .exercise-card:hover, .exercise-card:focus-visible { border-color: var(--accent); }
 .exercise-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 

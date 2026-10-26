@@ -34,6 +34,23 @@ export function saveExercise<S>(id: string, saved: Saved<S>) {
   } catch { /* storage unavailable: stats live for this session only */ }
 }
 
+// A small per-device preference (e.g. which tables a grammar page shows),
+// stored as JSON under bueffel-<name>
+export function loadPref<T>(name: string, fallback: T): T {
+  try {
+    const v = localStorage.getItem('bueffel-' + name);
+    return v === null ? fallback : JSON.parse(v);
+  } catch {
+    return fallback;
+  }
+}
+
+export function savePref(name: string, value: unknown) {
+  try {
+    localStorage.setItem('bueffel-' + name, JSON.stringify(value));
+  } catch { /* storage unavailable: kept for this visit only */ }
+}
+
 // 'system' follows the device's light/dark setting; 'light' and 'dark' override it
 export type Theme = 'system' | 'light' | 'dark'
 

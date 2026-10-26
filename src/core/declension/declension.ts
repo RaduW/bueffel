@@ -97,6 +97,9 @@ function createTask(s: Settings): GapFillTask<DeclensionPrompt> {
 export const declension: GapFillExercise<DeclensionPrompt> = {
   id: 'declension',
   title: 'Declension practice',
+  info: `Decline the noun for the case shown, with the adjective if one is given: choose the right form in each row of options, in any order. A wrong choice turns red; try again.
+
+The settings (gear) choose the exercises, nouns, genders and cases.`,
   options: 'all',
   scoreColumns: ['exercise'],
   scoreLabel: (tag, value) => tag === 'exercise' ? exerciseById(value)?.name ?? value : value,
@@ -112,9 +115,4 @@ export const declension: GapFillExercise<DeclensionPrompt> = {
     return task;
   },
 };
-
-// The selected exercises, for the declension tables
-export function selectedExercises(values: SettingValues): string[] {
-  return multiValue(SETTINGS, values, 'exercises');
-}
 

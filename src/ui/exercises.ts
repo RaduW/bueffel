@@ -5,7 +5,7 @@ import { declension } from '../core/declension/declension.ts'
 import { declensionSentences } from '../core/sentences/declensionSentences.ts'
 import { gapFillPage } from './common/GapFillPage.tsx'
 import { DeclensionPrompt } from './declension/DeclensionPrompt.tsx'
-import { DeclensionHelp } from './declension/TablesDialog.tsx'
+import { DECLENSION_TABLES } from './grammar.ts'
 
 export interface ExercisePage {
   // URL hash: #/<route>
@@ -17,6 +17,11 @@ export interface ExercisePage {
 }
 
 export const EXERCISE_PAGES: ExercisePage[] = [
-  { route: 'declension', title: declension.title, component: gapFillPage(declension, { Prompt: DeclensionPrompt, Help: DeclensionHelp }) },
-  { route: 'sentences', title: declensionSentences.title, component: gapFillPage(declensionSentences) },
+  { route: 'declension', title: declension.title, component: gapFillPage(declension, {
+    Prompt: DeclensionPrompt,
+    grammar: [DECLENSION_TABLES],
+  }) },
+  { route: 'sentences', title: declensionSentences.title, component: gapFillPage(declensionSentences, {
+    grammar: [DECLENSION_TABLES],
+  }) },
 ];

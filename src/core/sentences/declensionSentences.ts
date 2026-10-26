@@ -325,18 +325,9 @@ function createTask(c: Choice, frames: Frame[]): GapFillTask | null {
 export const declensionSentences: GapFillExercise = {
   id: 'declension-sentences',
   title: 'Declension in sentences',
-  info: `Complete the sentence, one word at a time. Each gap shows the start of the word; choose the right ending from the options below the sentence. After each noun, its gender is given in brackets: ♂\uFE0E maskulin, ♀\uFE0E feminin, ⚲\uFE0E neutrum, ⚤\uFE0E Plural (male and female). A wrong choice turns red: try again until you find the right one. Then the options move on to the next word.
+  info: `Complete the sentence one word at a time: choose each word's ending from the options below it. After each noun its gender is given: ♂\uFE0E maskulin, ♀\uFE0E feminin, ⚲\uFE0E neutrum, ⚤\uFE0E Plural.
 
-The sentences have one, two or three noun phrases, in any of the four cases. Each noun phrase takes one of five forms:
-der Mann (definite article + noun), einen Mann (ein, kein, mein … + noun), alte Leute (adjective + noun, only in the plural), dem alten Mann (definite article + adjective + noun), einem alten Mann (ein, kein, mein … + adjective + noun).
-
-Two questions help every time: which case does the word's place in the sentence need, and does the article already show it? After der, die, das … the adjective only takes -e or -en. After ein, kein, mein … it does too, except where the article has no ending (ein alter Mann, ein kleines Kind). Without an article, the adjective shows the case itself.
-
-If you made a mistake, the sentence stays when it's complete, with the case and gender of each noun phrase written in front of it, e.g. (Akk m) or (Dat pl); click Next (or press Enter) to go on. Without mistakes, the next sentence comes by itself.
-
-In the settings (gear icon) you choose the cases, forms, genders, how many noun phrases a sentence has, and which ein-words appear. A noun phrase that doesn't fit your choice (e.g. a Nominativ subject when you practise only Dativ) is filled in already, in its own colour, and not counted. Once a noun phrase is complete, its words take the colour of its case: Nominativ blue, Akkusativ orange, Dativ green, Genitiv purple.
-
-Your results are counted per case and form, separately for each noun phrase: a phrase counts as a success when all its words were right at the first try. Skipped sentences are not counted.`,
+A wrong choice turns red; try again. After a mistake the sentence stays, with the case and gender of each noun phrase in front of it, e.g. (Dat pl), until you click Next. The settings (gear) choose the cases, forms and more.`,
   settings: SETTINGS,
   problem(values) {
     return framesFor(readChoice(values)).length ? null

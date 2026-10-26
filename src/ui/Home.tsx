@@ -1,12 +1,14 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { AboutDialog } from './AboutDialog.tsx'
 import { AppSettingsDialog } from './AppSettingsDialog.tsx'
 import { EXERCISE_PAGES } from './exercises.ts'
 import { Header } from './common/Header.tsx'
-import { SettingsIcon } from './common/icons.tsx'
+import { BookIcon, SettingsIcon } from './common/icons.tsx'
+import { GRAMMAR_PAGES } from './grammar.ts'
 import { navigate } from './useHashRoute.ts'
 
-// The start page: one card per exercise, showing only its title
+// The start page: Practice (one card per exercise) and Grammar (one card per
+// grammar page); a card shows only its title
 export function Home() {
   const [aboutOpen, setAboutOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -31,17 +33,28 @@ export function Home() {
       <AboutDialog open={aboutOpen} onClose={() => setAboutOpen(false)} />
       <AppSettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} />
       <main>
-        <p className="tagline">German exercises. Pick one to start.</p>
+        <p className="tagline">German exercises and grammar.</p>
+        <h2 className="home-section">Practice</h2>
         <ul className="exercise-list">
-          {EXERCISE_PAGES.map(ex => (
-            <li key={ex.route}>
-              <a className="exercise-card" href={'#/' + ex.route} onClick={e => { e.preventDefault(); navigate(ex.route); }}>
-                {ex.title}
-              </a>
-            </li>
+          {EXERCISE_PAGES.map(ex => <Card key={ex.route} route={ex.route}>{ex.title}</Card>)}
+        </ul>
+        <h2 className="home-section">Grammar</h2>
+        <ul className="exercise-list">
+          {GRAMMAR_PAGES.map(g => (
+            <Card key={g.route} route={g.route}><BookIcon size={22} />{g.title}</Card>
           ))}
         </ul>
       </main>
     </div>
+  );
+}
+
+function Card({ route, children }: { route: string; children: ReactNode }) {
+  return (
+    <li>
+      <a className="exercise-card" href={'#/' + route} onClick={e => { e.preventDefault(); navigate(route); }}>
+        {children}
+      </a>
+    </li>
   );
 }

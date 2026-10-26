@@ -27,7 +27,7 @@ exercise types are coming.
 
 Both exercises are gapFill exercises (see below) on the same page
 (`src/ui/common/GapFillPage.tsx`); an exercise adds its own components only
-where it differs (declension: the prompt above the phrase, the tables as help).
+where it differs (declension: the prompt above the phrase).
 
 `@vitejs/plugin-react` was installed with `--legacy-peer-deps` (an optional Babel
 peer conflicts with workbox's Babel). `npm ci` works without the flag; a later
@@ -52,11 +52,24 @@ peer conflicts with workbox's Babel). `npm ci` works without the flag; a later
   record per [date, exercise] with a `scores` scoreboard. v1's `days` store is
   deleted on upgrade. `clearHistory(exercise)` clears one exercise
 - `src/ui/App.tsx`: picks the page from the URL hash (`useHashRoute`): `#/<route>`
-  of an exercise, otherwise the home page (`Home.tsx`)
-- `src/ui/exercises.ts`: the exercises on the home page (route, title, component).
-  Home: icon + "Büffel" header, a tagline, one card per exercise showing only its
-  title (no description or progress on the card; user's choice).
-  A new exercise = a new entry here plus its folder
+  of an exercise or a grammar page, otherwise the home page (`Home.tsx`)
+- Home: icon + "Büffel" header, a tagline, then two sections (user's choice:
+  sections, not tabs, while the lists are short): **Practice** (one card per
+  exercise) and **Grammar** (one card per grammar page, with a book icon). Cards
+  show only the title (no description or progress; user's choice)
+- `src/ui/exercises.ts`: the exercises (route, title, component); a new exercise
+  = a new entry here plus its folder
+- `src/ui/grammar.ts`: the grammar pages (route `grammar/<id>`, title, `Content`
+  getting {compact}); a new cheat sheet = a new entry + a component in
+  `src/ui/grammar/`. `GrammarPage.tsx` shows one (header + back; back =
+  `goBack()`: the previous page, e.g. the exercise it was opened from, or home
+  if it's the first page shown). `grammar/DeclensionTables.tsx`: one table per
+  declension exercise, chips choose which (remembered via `loadPref`/`savePref`,
+  `bueffel-grammar-declension-tables`)
+- Exercise help (?): `HelpDialog` = a very brief explanation (user: keep it
+  short) + a "Grammar" list of links (`gapFillPage(def, { grammar: [PAGE] })`)
+  to the global grammar pages (user's choice: no copy inside the dialog; leaving
+  the exercise ends the current task like Skip)
 - Settings: the home page's gear opens `AppSettingsDialog` (theme only, user's
   choice); each exercise's gear has its own settings with Reset statistics and
   Clear history for that exercise
@@ -64,7 +77,7 @@ peer conflicts with workbox's Babel). `npm ci` works without the flag; a later
   the version comes from package.json (`__APP_VERSION__`, defined in vite.config.ts)
 - `src/ui/common/` (user's request: UI shared by the exercises): `GapFillPage`
   (state, auto-advance, Enter, wide/compact layout; `gapFillPage(def, { Prompt,
-  Help })` makes the page component; leaving goes home, an unfinished task counts
+  grammar })` makes the page component; leaving goes home, an unfinished task counts
   like Skip), `Sentence`, `OptionRow`, `ResultBanner`, `ScorePanel` (groups by
   `scoreColumns`), `SettingsDialog` (drawn from the `SettingDef`s, plus Reset
   statistics / Clear history), `HelpDialog`, `HistoryControls`, `Header`,
@@ -73,8 +86,7 @@ peer conflicts with workbox's Babel). `npm ci` works without the flag; a later
   mechanism: load/save, `addResults` = progress + history, `resetStats`,
   `deleteHistory`)
 - `src/ui/declension/`: `DeclensionPrompt` (case badge, exercise, noun + gender
-  + adjective), `TablesDialog` + `DeclensionHelp` (the tables of the selected
-  exercises, as the help)
+  + adjective)
 - `src/main.tsx`: entry for `index.html`
 
 ## gapFill (reusable exercise kind)
@@ -125,7 +137,6 @@ the same page serves many exercises (declension, verbs …).
 - Decided with the user: help only behind the ? button; skipped tasks are not
   scored (and don't touch the header tally or streak); after a task with
   mistakes there is no auto-advance (explanations shown, Next / Enter to go on).
-- Later (user has a plan): offering the declension tables in the sentences exercise.
 
 ## Icon
 
@@ -143,7 +154,7 @@ kept, but not used.
   nothing (not even the streak). The streak follows score groups in order.
 - Storage keys are prefixed `bueffel-`: other apps on raduw.github.io share
   the same origin and storage.
-- Desktop tables dialog is 840px wide so "keinen alten Leuten" fits without scrolling.
+- The declension tables fit the page card (728px) without scrolling ("keinen alten Leuten").
 
 ## Commands
 

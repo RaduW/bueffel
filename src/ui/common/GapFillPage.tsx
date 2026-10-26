@@ -1,7 +1,8 @@
 // The page for any gapFill exercise: an optional prompt, the sentence, the
 // options (of the next gap, or of every gap at once), the result, and the
 // scores. Everything exercise-specific comes from the GapFillExercise
-// definition, plus optional components for the prompt and the help.
+// definition, plus an optional prompt component and the grammar pages the
+// help links to.
 //
 // Two layouts on one page: the wide one, and a compact one for phones (bigger
 // tap targets, Skip / Next in a bar at the bottom). They differ only in where
@@ -13,6 +14,7 @@ import { defaultValues, emptySelection } from '../../core/gapfill/settings.ts'
 import type { GapFillExercise, SettingValues } from '../../core/gapfill/types.ts'
 import { tally } from '../../core/stats.ts'
 import { Header } from './Header.tsx'
+import type { GrammarPage } from '../grammar.ts'
 import { HelpDialog } from './HelpDialog.tsx'
 import { HelpIcon, SettingsIcon } from './icons.tsx'
 import { ADVANCE_DELAY_MS, COMPACT_QUERY } from './layout.ts'
@@ -25,20 +27,12 @@ import { StatsBar } from './StatsBar.tsx'
 import { useExerciseProgress } from './useExerciseProgress.ts'
 import { useMediaQuery } from './useMediaQuery.ts'
 
-// What an exercise's own help dialog gets (in place of the help text)
-export interface HelpProps {
-  open: boolean
-  compact: boolean
-  settings: SettingValues
-  onClose: () => void
-}
-
-// An exercise's own components
+// What an exercise adds to the page
 export interface PageParts<P> {
   // Shown above the sentence, from the task's prompt
   Prompt?: ComponentType<{ prompt: P }>
-  // Opened by the help button, in place of the exercise's help text
-  Help?: ComponentType<HelpProps>
+  // Grammar pages linked from the help dialog (e.g. the declension tables)
+  grammar?: GrammarPage[]
 }
 
 interface Props<P> extends PageParts<P> {
@@ -46,7 +40,7 @@ interface Props<P> extends PageParts<P> {
   onFinish: () => void
 }
 
-export function GapFillPage<P>({ exercise, Prompt, Help, onFinish }: Props<P>) {
+export function GapFillPage<P>({ exercise, Prompt, grammar, onFinish }: Props<P>) {
   const compact = useMediaQuery(COMPACT_QUERY);
   const allOptions = exercise.options === 'all';
   // Saved under the exercise's id, like every exercise's (useExerciseProgress)
@@ -130,7 +124,6 @@ export function GapFillPage<P>({ exercise, Prompt, Help, onFinish }: Props<P>) {
   const result = finished && (
     <ResultBanner mistakes={totalMistakes(state)} nextRef={nextButton} onNext={nextTask} label={compact ? 'Next' : 'Next ⏎'} />
   );
-  const help = { open: helpOpen, compact, settings, onClose: () => setHelpOpen(false) };
 
   return (
     <div className={compact ? 'app compact' : 'app'}>
@@ -152,7 +145,13 @@ export function GapFillPage<P>({ exercise, Prompt, Help, onFinish }: Props<P>) {
       >
         <StatsBar stats={tally(progress)} />
       </Header>
-      {Help ? <Help {...help} /> : <HelpDialog {...help} title={exercise.title} info={exercise.info} />}
+      <HelpDialog
+        open={helpOpen}
+        title={exercise.title}
+        info={exercise.info}
+        grammar={grammar}
+        onClose={() => setHelpOpen(false)}
+      />
       <SettingsDialog
         open={settingsOpen}
         defs={exercise.settings ?? []}
