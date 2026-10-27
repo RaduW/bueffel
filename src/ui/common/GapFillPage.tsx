@@ -123,7 +123,7 @@ export function GapFillPage<P>({ exercise, Prompt, grammar, onFinish }: Props<P>
 
   const { gaps, prompt } = state.task;
   const row = (i: number) => (
-    <OptionRow key={allOptions ? i : state.current} gap={gaps[i]} wrong={state.wrong[i]} solved={state.solved[i]} onChoose={opt => choose(i, opt)} />
+    <OptionRow key={allOptions ? i : state.current} gap={gaps[i]} wrong={state.wrong[i]} solved={state.solved[i]} stacked={exercise.longOptions} onChoose={opt => choose(i, opt)} />
   );
   const result = finished && (
     <ResultBanner mistakes={totalMistakes(state)} nextRef={nextButton} onNext={nextTask} label={compact ? 'Next' : 'Next ⏎'} />

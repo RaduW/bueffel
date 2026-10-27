@@ -65,7 +65,9 @@ peer conflicts with workbox's Babel). `npm ci` works without the flag; a later
   `goBack()`: the previous page, e.g. the exercise it was opened from, or home
   if it's the first page shown). `grammar/DeclensionTables.tsx`: one table per
   declension exercise, chips choose which (remembered via `loadPref`/`savePref`,
-  `bueffel-grammar-declension-tables`)
+  `bueffel-grammar-declension-tables`). `grammar/ConjunctionsSheet.tsx`
+  ("Conjunctions & word order", sections 1–2 of the conjunctions doc: the three
+  orders with examples, rules, connectors per kind), linked from word-order's help
 - Exercise help (?): `HelpDialog` = a very brief explanation (user: keep it
   short) + a "Grammar" list of links (`gapFillPage(def, { grammar: [PAGE] })`)
   to the global grammar pages (user's choice: no copy inside the dialog; leaving
@@ -134,6 +136,14 @@ the same page serves many exercises (declension, verbs …).
   other phrases are given (user's choice (b): pre-filled in a distinct colour).
   Frames need a selected length and at least one asked phrase. No n-nouns yet (user:
   add later as an option); frames needing ein/kein or contractions are left out.
+- `src/core/conjunctions/wordOrder.ts`: "Conjunctions: word order" (route
+  `word-order`), from `docs/German Conjunctions Exercises.md`. Template
+  "{____}, sondern {____}."; both gaps offer the same options: both clauses in
+  all three orders (straight / inverted / verb last; grouped by clause,
+  `longOptions` = one per line). Clauses are [subject, verb, rest, verb-last
+  ending for separable verbs]. Subordinating pairs marked `front` sometimes
+  start with the connector ("Weil … , gehe ich …"; setting). Settings: connector
+  kinds. One score group per task, tags kind/connector.
 - Decided with the user: help only behind the ? button; skipped tasks are not
   scored (and don't touch the header tally or streak); after a task with
   mistakes there is no auto-advance (explanations shown, Next / Enter to go on).

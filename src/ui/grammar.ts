@@ -3,6 +3,7 @@
 // Add new ones here.
 
 import type { ComponentType } from 'react'
+import { ConjunctionsSheet } from './grammar/ConjunctionsSheet.tsx'
 import { DeclensionTables } from './grammar/DeclensionTables.tsx'
 
 // What a grammar page's content gets
@@ -21,4 +22,8 @@ export const DECLENSION_TABLES: GrammarPage = {
   route: 'grammar/declension-tables', title: 'Declension tables', Content: DeclensionTables,
 };
 
-export const GRAMMAR_PAGES: GrammarPage[] = [DECLENSION_TABLES];
+export const CONJUNCTIONS: GrammarPage = {
+  route: 'grammar/conjunctions', title: 'Conjunctions & word order', Content: ConjunctionsSheet,
+};
+
+export const GRAMMAR_PAGES: GrammarPage[] = [DECLENSION_TABLES, CONJUNCTIONS];

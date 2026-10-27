@@ -7,15 +7,17 @@ interface Props {
   // Solved: the answer is marked and every option disabled (with all options
   // shown at once, solved rows stay)
   solved: boolean
+  // Long options (whole clauses): one per line
+  stacked?: boolean
   onChoose: (opt: string) => void
 }
 
 // The options of one gap, with its label
-export function OptionRow({ gap, wrong, solved, onChoose }: Props) {
+export function OptionRow({ gap, wrong, solved, stacked, onChoose }: Props) {
   return (
     <div className="slot">
       {gap.label && <div className="slot-label">{gap.label}</div>}
-      <div className={solved ? 'options done' : 'options'}>
+      <div className={'options' + (stacked ? ' stacked' : '') + (solved ? ' done' : '')}>
         {gap.options.map(opt => {
           const isWrong = wrong.includes(opt);
           const correct = solved && opt === gap.answer;

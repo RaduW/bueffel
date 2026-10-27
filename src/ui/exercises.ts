@@ -1,11 +1,12 @@
 // The exercises offered on the home page. Add new ones here.
 
 import type { ComponentType } from 'react'
+import { wordOrder } from '../core/conjunctions/wordOrder.ts'
 import { declension } from '../core/declension/declension.ts'
 import { declensionSentences } from '../core/sentences/declensionSentences.ts'
 import { gapFillPage } from './common/GapFillPage.tsx'
 import { DeclensionPrompt } from './declension/DeclensionPrompt.tsx'
-import { DECLENSION_TABLES } from './grammar.ts'
+import { CONJUNCTIONS, DECLENSION_TABLES } from './grammar.ts'
 
 export interface ExercisePage {
   // URL hash: #/<route>
@@ -23,5 +24,8 @@ export const EXERCISE_PAGES: ExercisePage[] = [
   }) },
   { route: 'sentences', title: declensionSentences.title, component: gapFillPage(declensionSentences, {
     grammar: [DECLENSION_TABLES],
+  }) },
+  { route: 'word-order', title: wordOrder.title, component: gapFillPage(wordOrder, {
+    grammar: [CONJUNCTIONS],
   }) },
 ];

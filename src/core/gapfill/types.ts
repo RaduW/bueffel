@@ -14,6 +14,8 @@ export interface GapFillExercise<P = unknown> {
   // 'current' (default): only the options of the next gap, filled in order;
   // 'all': the options of every gap at once, filled in any order
   options?: 'current' | 'all'
+  // Options are whole clauses, not words: shown one per line
+  longOptions?: boolean
   // The tags the results table groups by, in this order; default: all tags
   scoreColumns?: string[]
   // How a tag value is shown in the results table (e.g. an id as a name); default: as is

@@ -221,6 +221,9 @@ button:disabled { cursor: default; }
 .options button.correct { background: var(--ok-bg); border-color: var(--ok); color: var(--ok); font-weight: 700; }
 .options button.wrong { background: var(--bad-bg); border-color: var(--bad); color: var(--bad); }
 .options.done button:not(.correct):not(.wrong) { opacity: 0.45; }
+/* Whole clauses: one per line */
+.options.stacked { flex-direction: column; align-items: stretch; }
+.options.stacked button { text-align: left; }
 
 .result {
   margin-top: 24px;
@@ -266,6 +269,16 @@ button.danger { color: var(--bad); }
   background: color-mix(in srgb, var(--g) var(--ending-tint), transparent);
   border-radius: 3px;
 }
+
+/* Conjunctions cheat sheet: the connector bold, the verb highlighted; long cells wrap */
+.conjunctions { --g: var(--accent); }
+.conjunctions td { white-space: normal; vertical-align: top; }
+.conjunctions td:first-child:not(:only-child) { width: 1%; white-space: nowrap; }
+.conjunctions em { font-style: normal; font-weight: 700; }
+.conjunctions .muted { color: var(--muted); }
+.conjunctions .example { font-style: italic; }
+.conjunctions .rules { margin: 0; padding-left: 20px; line-height: 1.5; }
+.conjunctions .rules .example { display: block; }
 
 .actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px; }
 
@@ -426,6 +439,8 @@ h1:has(.logo) { display: flex; align-items: center; gap: 10px; }
   font-size: 1.3rem;
   overflow-wrap: anywhere;
 }
+.compact .options.stacked { display: flex; }
+.compact .options.stacked button { padding: 8px 12px; font-size: 1.15rem; overflow-wrap: normal; }
 
 .compact .tables table { font-size: 1.3rem; }
 /* Equal widths for the two gender columns of the portrait layout */
@@ -468,3 +483,6 @@ h1:has(.logo) { display: flex; align-items: center; gap: 10px; }
 .compact .dialog-actions { justify-content: flex-start; flex-wrap: wrap; gap: 8px; }
 .compact .dialog-actions button { min-height: 44px; padding: 0 10px; font-size: 0.9rem; white-space: nowrap; }
 .compact #close-settings, .compact #close-tables { margin-left: auto; }
+
+/* The conjunctions sheet is mostly text: smaller than the declension tables */
+.compact .conjunctions table { font-size: 1.05rem; }
