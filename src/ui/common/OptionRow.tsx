@@ -29,6 +29,7 @@ export function OptionRow({ gap, wrong, solved, stacked, onChoose }: Props) {
               onClick={() => onChoose(opt)}
             >
               {opt}
+              {gap.optionNotes?.[opt] && <small className="option-note">{gap.optionNotes[opt]}</small>}
             </button>
           );
         })}

@@ -150,6 +150,27 @@ the same page serves many exercises (declension, verbs …).
   ending for separable verbs]. Subordinating pairs marked `front` sometimes
   start with the connector ("Weil … , gehe ich …"; setting). Settings: connector
   kinds. One score group per task, tags kind/connector.
+- Pronoun exercises (user chose 1, 2, 6 of the proposal, separate cards), in
+  `src/core/pronouns/` (`forms.ts`: the pronoun data, also for the Pronouns
+  grammar page; `context.ts`: `ContextPrompt` {label, before, marked, after,
+  note?}, drawn by `src/ui/pronouns/ContextPrompt.tsx`). All link the Pronouns page.
+  - `replaceNoun.ts` "Pronouns: replace the noun" (`pronouns-replace`): a frame +
+    nouns from Declension in sentences (exported from there), one noun phrase
+    per task replaced (user: one by one) by er/ihn/ihm/es/sie/ihr/ihnen. Not
+    replaced: Genitiv, "Das ist {}", things after a preposition (German says
+    damit, darauf). An Akk pronoun moves before a Dat noun phrase right in front
+    of it ("Ich gebe es dem Kind"). Settings: cases (Nom/Akk/Dat), genders,
+    showGender (letter after the marked phrase). Tags case/gender.
+  - `personForms.ts` "Pronouns: mich or mir?" (`pronouns-persons`): handwritten
+    one-gap sentences (Akk or Dat) with a person cue as the gap note; options =
+    that person's Nom/Akk/Dat forms; `exclude` skips reflexive/odd persons.
+    Settings: cases, persons. Tags case/person.
+  - `questionWords.ts` "Question words" (`question-words`): handwritten answer
+    (marked part) + question with the question word as gap; options wer, wen,
+    wem, wessen, was, each with its English meaning under it (gap `optionNotes`:
+    small text under an option's button, not part of the answer; user's request).
+    The Pronouns page's question table shows the English too. Setting: cases.
+    Tags case/about (person/thing).
 - Decided with the user: help only behind the ? button; skipped tasks are not
   scored (and don't touch the header tally or streak); after a task with
   mistakes there is no auto-advance (explanations shown, Next / Enter to go on).

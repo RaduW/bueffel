@@ -67,6 +67,8 @@ export interface Gap {
   // Always shown in brackets after the gap, not part of the sentence,
   // e.g. the noun's gender: 'm'
   note?: string
+  // Shown small under an option's text, by option (e.g. its English meaning)
+  optionNotes?: Record<string, string>
   // Shown filled in from the start, in its own colour; not asked and not scored
   // (e.g. a noun phrase in a case the learner didn't select)
   given?: boolean

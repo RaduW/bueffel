@@ -220,6 +220,8 @@ button:hover:not(:disabled) { border-color: var(--accent); }
 button:disabled { cursor: default; }
 
 .options button { min-width: 72px; font-size: 1.05rem; }
+/* A small line under the option, e.g. its English meaning */
+.option-note { display: block; font-size: 0.7em; font-weight: 400; color: var(--muted); }
 .options button.correct { background: var(--ok-bg); border-color: var(--ok); color: var(--ok); font-weight: 700; }
 .options button.wrong { background: var(--bad-bg); border-color: var(--bad); color: var(--bad); }
 .options.done button:not(.correct):not(.wrong) { opacity: 0.45; }
@@ -272,11 +274,16 @@ button.danger { color: var(--bad); }
   border-radius: 3px;
 }
 
+/* Pronoun exercises: the sentence the task is about, its part marked */
+.context-sentence { font-size: 1.25rem; margin: 6px 0 0; }
+.context-sentence mark { background: color-mix(in srgb, var(--accent) 18%, transparent); color: inherit; border-radius: 4px; padding: 0 3px; font-weight: 600; }
+
 /* Pronoun tables: case columns with a coloured header; row labels (persons) plain */
 .tables thead th[class^="case-"] { color: #fff; border-bottom-color: transparent; }
 .tables tbody th.row-label { color: var(--muted); background: none; font-weight: 600; }
 .tables table.list td { font-weight: 500; }
 .tables .hint { margin: 8px 0 0; }
+.tables .en { color: var(--muted); font-weight: 400; font-style: italic; margin-left: 4px; }
 
 /* Conjunctions cheat sheet: the connector bold, the verb highlighted; long cells wrap */
 .conjunctions { --g: var(--accent); }

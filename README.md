@@ -88,6 +88,14 @@ The start page has two sections: **Practice**, with the exercises (**Declension 
 
 **Skip** moves to a new question; a skipped question isn't counted. The **?** button explains the exercise briefly and links to the **Declension tables** page; its back arrow brings you back to the exercise (with a new question). The **Results** table counts questions per exercise.
 
+**Pronoun exercises**
+
+- **Pronouns: replace the noun:** a sentence is shown with one noun phrase marked (*Ich helfe **dem alten Mann**.*); below it, the same sentence with a gap in its place, to fill with the pronoun (*Ich helfe **ihm**.*). Options: er, ihn, ihm, es, sie, ihr, ihnen. An Akk pronoun moves in front of a Dativ noun (*Ich gebe **es** dem Kind.*). Settings: cases, genders, and whether the noun's gender is shown.
+- **Pronouns: mich or mir?:** one gap with a person in brackets (*Kannst du ___ (ich) helfen?*); the options are that person's forms (ich, mich, mir), so the choice is Akkusativ or Dativ. Settings: cases, persons.
+- **Question words:** an answer with a part marked (*Ich helfe **dem Mann**.*); choose the question word that asks for it (*___ hilfst du?* → *Wem*). Settings: cases.
+
+Each links to the **Pronouns** page from its **?** button.
+
 **Declension in sentences**
 
 A whole sentence is completed one word at a time, e.g. *D__ alt__ Mann__ (♂) sieht d__ klein__ Hund__ (♂).* Each noun's gender is given in grey brackets after it: ♂ maskulin, ♀ feminin, ⚲ neutrum, ⚤ plural. The gap being filled is highlighted, and below the sentence are the options for that word only: wrong choices turn red, the right one fills the gap and the options move on to the next word. A sentence solved without mistakes moves on by itself; after a mistake it stays, with the case and gender of each noun phrase written in front of it (*(Nom m) Der alte Mann sieht (Akk pl) die kleinen Kinder.*), until you click **Next** or press **Enter**. The **?** button explains the exercise briefly and links to the **Declension tables** page.

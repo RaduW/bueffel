@@ -1,5 +1,5 @@
 import { CASES } from '../../core/grammar.ts'
-import { PERSONS, possessiveCell, QUESTION, REFLEXIVE, relativeCell } from '../../core/pronouns.ts'
+import { PERSONS, possessiveCell, QUESTION, REFLEXIVE, relativeCell } from '../../core/pronouns/forms.ts'
 import type { GrammarProps } from '../grammar.ts'
 import { CaseGenderTable, Chips, ListTable, useChoice, useGenderGroups, type Choice, type Column } from './tables.tsx'
 
@@ -73,7 +73,7 @@ export function PronounTables({ compact }: GrammarProps) {
           <ListTable
             corner="Kasus"
             columns={[{ title: 'People (wer)' }, { title: 'Things (was)' }]}
-            rows={QUESTION.map((q, ci) => ({ label: CASES[ci].name.slice(0, 3), className: 'case-' + CASES[ci].id, cells: [q.wer, q.was] }))}
+            rows={QUESTION.map((q, ci) => ({ label: CASES[ci].name.slice(0, 3), className: 'case-' + CASES[ci].id, cells: [<>{q.wer} <span className="en">{q.werEn}</span></>, <>{q.was} <span className="en">{q.wasEn}</span></>] }))}
           />
         </section>
       )}

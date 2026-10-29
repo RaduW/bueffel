@@ -15,13 +15,13 @@ import { pick } from '../random.ts'
 // animal: can see, wait, lie somewhere; place: you can go through it;
 // furniture: something can stand next to it; surface: something can sit or
 // lie on it; portable: can be bought, given, laid down; vehicle: stands outside
-type Tag = 'person' | 'animal' | 'thing' | 'place' | 'furniture' | 'surface' | 'portable' | 'vehicle'
+export type Tag = 'person' | 'animal' | 'thing' | 'place' | 'furniture' | 'surface' | 'portable' | 'vehicle'
 // adjectives: when only some fit this noun (otherwise by person or thing)
-type SentenceNoun = Noun & { tags: Tag[]; adjectives?: string[] }
+export type SentenceNoun = Noun & { tags: Tag[]; adjectives?: string[] }
 
 // The building blocks of "declination-exercises.md", without n-nouns for now.
 // opts must contain every form of the noun (all four cases)
-const NOUNS: SentenceNoun[] = [
+export const NOUNS: SentenceNoun[] = [
   { w: 'Mann', g: 'm', gen: 'Mannes', opts: ['Mann', 'Mannen', 'Mannes'], tags: ['person'] },
   { w: 'Freund', g: 'm', gen: 'Freundes', opts: ['Freund', 'Freunden', 'Freundes'], tags: ['person'] },
   { w: 'Hund', g: 'm', gen: 'Hundes', opts: ['Hund', 'Hunden', 'Hundes'], tags: ['animal'] },
@@ -52,13 +52,13 @@ const NOUNS: SentenceNoun[] = [
 ];
 
 // Adjectives that make sense for people and animals, and for everything else
-const PERSON_ADJECTIVES = ['alt', 'jung', 'klein', 'groß', 'nett'];
-const THING_ADJECTIVES = ['alt', 'neu', 'klein', 'groß', 'schön'];
+export const PERSON_ADJECTIVES = ['alt', 'jung', 'klein', 'groß', 'nett'];
+export const THING_ADJECTIVES = ['alt', 'neu', 'klein', 'groß', 'schön'];
 
 // A sentence with one noun phrase per {}: its case, and which nouns fit
 // (any of the tags). singular: the verb or the sentence needs a singular noun
-interface Phrase { case: CaseId; tags: Tag[]; singular?: boolean }
-interface Frame { id: string; text: string; phrases: Phrase[] }
+export interface Phrase { case: CaseId; tags: Tag[]; singular?: boolean }
+export interface Frame { id: string; text: string; phrases: Phrase[] }
 
 const p = (caseId: CaseId, tags: Tag[], singular = false): Phrase => ({ case: caseId, tags, singular });
 const PEOPLE: Tag[] = ['person'];
@@ -72,7 +72,7 @@ const CREATURE = p('nom', LIVING, true);
 // From "declination-exercises.md". Left out for now: sentences that need
 // ein/kein (5, 9), a fixed gender (44), contractions such as beim, vom, im
 // (17, 18, 41, 49, 50, 57), or special nouns (25, 26)
-const FRAMES: Frame[] = [
+export const FRAMES: Frame[] = [
   // One gap: Nominativ
   { id: 'wartet', text: '{} wartet vor der Tür.', phrases: [CREATURE] },
   { id: 'das-ist', text: 'Das ist {}.', phrases: [p('nom', ANYTHING, true)] },
@@ -134,9 +134,9 @@ const FRAMES: Frame[] = [
 // The forms a noun phrase can take; id is also its score tag. Without an article,
 // countable nouns take adjective + noun only in the plural (alte Leute, not
 // *alter Mann*), so that form never picks a singular noun
-interface Pattern { id: string; article: 'def' | 'ein' | 'none'; adjective: boolean; pluralOnly?: boolean }
+export interface Pattern { id: string; article: 'def' | 'ein' | 'none'; adjective: boolean; pluralOnly?: boolean }
 
-const PATTERNS: Pattern[] = [
+export const PATTERNS: Pattern[] = [
   { id: 'def.Art+noun', article: 'def', adjective: false },
   { id: 'ein-word+noun', article: 'ein', adjective: false },
   { id: 'adj+noun', article: 'none', adjective: true, pluralOnly: true },
@@ -151,7 +151,7 @@ const ADJ_TABLE = { def: ADJ_ENDING.weak, ein: ADJ_ENDING.mixed, none: ADJ_ENDIN
 // The gaps of one noun phrase, in the pattern's form: (article) (adjective) noun.
 // einWord: which of ein/kein/mein … to use, for the ein-word patterns
 // showGender: the noun's gender letter after it (a setting)
-function phraseGaps(noun: SentenceNoun, adj: string, einWord: string, pattern: Pattern, ci: CaseIndex, showGender: boolean): Gap[] {
+export function phraseGaps(noun: SentenceNoun, adj: string, einWord: string, pattern: Pattern, ci: CaseIndex, showGender: boolean): Gap[] {
   const gaps: Gap[] = [];
   if (pattern.article === 'def') {
     gaps.push({ label: 'Article', options: DEF_OPTIONS, answer: DEF_ARTICLE[noun.g][ci] });
