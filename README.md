@@ -64,7 +64,7 @@ The service worker only runs in production builds (`npm run build` / `npm run pr
 
 ## How to use it
 
-The start page has two sections: **Practice**, with the exercises (**Declension practice** and **Declension in sentences**), and **Grammar**, with pages to look things up (**Declension tables**: one table per form, with buttons at the top to choose which tables are shown; the choice is remembered). Click a card to open it. Clicking the icon or the name **Büffel** at the top opens the **About** dialog (what the app is, privacy, version, source link); the gear icon on the start page opens the app settings (the theme: device, light or dark). The back arrow next to the exercise's title finishes it and returns to the start page; leaving a question you've already started counts like **Skip** (it isn't counted). Each page has its own address (`#/declension`, `#/sentences`, `#/grammar/declension-tables`), so the browser's Back button and bookmarks work.
+The start page has two sections: **Practice**, with the exercises (**Declension practice** and **Declension in sentences**), and **Grammar**, with pages to look things up (**Declension tables**: one table per form; **Pronouns**: personal, reflexive, possessive and relative pronouns and the question words wer/was; on each page, buttons at the top choose which tables are shown, and the choice is remembered). Click a card to open it. Clicking the icon or the name **Büffel** at the top opens the **About** dialog (what the app is, privacy, version, source link); the gear icon on the start page opens the app settings (the theme: device, light or dark). The back arrow next to the exercise's title finishes it and returns to the start page; leaving a question you've already started counts like **Skip** (it isn't counted). Each page has its own address (`#/declension`, `#/sentences`, `#/grammar/declension-tables`, `#/grammar/pronouns`), so the browser's Back button and bookmarks work.
 
 **Declension practice**
 
@@ -133,7 +133,8 @@ To look at it, open the browser's developer tools: **Application → IndexedDB �
 | `src/ui/` | `App.tsx` (shows the start page or an exercise, by URL hash), `Home.tsx` (start page: one card per exercise), `exercises.ts` (the list of exercises), About and app settings dialogs |
 | `src/ui/common/` | UI shared by the exercises: the exercise page (`GapFillPage`), sentence, options, results, settings and help dialogs, header, tally, and `useExerciseProgress` (saves settings and statistics, writes the history) |
 | `src/ui/declension/` | What only Declension practice has: the prompt above the phrase (case, noun, gender, adjective) |
-| `src/ui/grammar.ts`, `src/ui/grammar/` | The grammar pages (the list, and the pages: declension tables) |
+| `src/ui/grammar.ts`, `src/ui/grammar/` | The grammar pages (the list, and the pages: declension tables, pronouns, conjunctions), with shared table building blocks in `grammar/tables.tsx` |
+| `src/core/pronouns.ts` | The pronoun tables' data |
 | `src/core/declension/` | Declension practice as a gapFill exercise: settings and question drawing |
 | `src/core/gapfill/` | gapFill, a reusable kind of exercise (fill a sentence gap by gap from options): the exercise interface, the template parser, the progress and scoring logic |
 | `src/core/sentences/` | gapFill exercise definitions; `declensionSentences.ts` is "Declension in sentences" |

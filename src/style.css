@@ -272,6 +272,12 @@ button.danger { color: var(--bad); }
   border-radius: 3px;
 }
 
+/* Pronoun tables: case columns with a coloured header; row labels (persons) plain */
+.tables thead th[class^="case-"] { color: #fff; border-bottom-color: transparent; }
+.tables tbody th.row-label { color: var(--muted); background: none; font-weight: 600; }
+.tables table.list td { font-weight: 500; }
+.tables .hint { margin: 8px 0 0; }
+
 /* Conjunctions cheat sheet: the connector bold, the verb highlighted; long cells wrap */
 .conjunctions { --g: var(--accent); }
 .conjunctions td { white-space: normal; vertical-align: top; }
@@ -444,6 +450,8 @@ h1:has(.logo) { display: flex; align-items: center; gap: 10px; }
 .compact .options.stacked button { padding: 8px 12px; font-size: 1.15rem; overflow-wrap: normal; }
 
 .compact .tables table { font-size: 1.3rem; }
+/* Person tables have five columns: a bit smaller, so they fit a phone */
+.compact .tables table.list { font-size: 1.1rem; }
 /* Equal widths for the two gender columns of the portrait layout */
 .compact .tables table.split td { width: 50%; }
 .compact .tables th, .compact .tables td { padding: 5px 6px; }

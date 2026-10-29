@@ -63,9 +63,15 @@ peer conflicts with workbox's Babel). `npm ci` works without the flag; a later
   getting {compact}); a new cheat sheet = a new entry + a component in
   `src/ui/grammar/`. `GrammarPage.tsx` shows one (header + back; back =
   `goBack()`: the previous page, e.g. the exercise it was opened from, or home
-  if it's the first page shown). `grammar/DeclensionTables.tsx`: one table per
-  declension exercise, chips choose which (remembered via `loadPref`/`savePref`,
-  `bueffel-grammar-declension-tables`). `grammar/ConjunctionsSheet.tsx`
+  if it's the first page shown). `grammar/tables.tsx`: shared building blocks
+  (`useChoice` + `Chips`: which tables are shown, remembered via
+  `loadPref`/`savePref` under `bueffel-grammar-<page>`; `CaseGenderTable`: case
+  rows × gender columns, endings highlighted, split rows on a phone in portrait;
+  `ListTable`: label + columns, case-coloured headers). `grammar/DeclensionTables.tsx`:
+  one table per declension exercise. `grammar/PronounTables.tsx` ("Pronouns",
+  data in `src/core/pronouns.ts`): personal (Nom–Gen per person), reflexive
+  (Akk/Dat), possessive articles (which per person + endings of mein; euer ->
+  eure), relative (der/dessen/deren/denen), question words (wer/was). `grammar/ConjunctionsSheet.tsx`
   ("Conjunctions & word order", sections 1–2 of the conjunctions doc: the three
   orders with examples, rules, connectors per kind), linked from word-order's help
 - Exercise help (?): `HelpDialog` = a very brief explanation (user: keep it

@@ -5,6 +5,7 @@
 import type { ComponentType } from 'react'
 import { ConjunctionsSheet } from './grammar/ConjunctionsSheet.tsx'
 import { DeclensionTables } from './grammar/DeclensionTables.tsx'
+import { PronounTables } from './grammar/PronounTables.tsx'
 
 // What a grammar page's content gets
 export interface GrammarProps {
@@ -28,4 +29,8 @@ export const CONJUNCTIONS: GrammarPage = {
   route: 'grammar/conjunctions', title: 'Conjunctions & word order', Content: ConjunctionsSheet,
 };
 
-export const GRAMMAR_PAGES: GrammarPage[] = [DECLENSION_TABLES, CONJUNCTIONS];
+export const PRONOUNS: GrammarPage = {
+  route: 'grammar/pronouns', title: 'Pronouns', Content: PronounTables, wide: true,
+};
+
+export const GRAMMAR_PAGES: GrammarPage[] = [DECLENSION_TABLES, PRONOUNS, CONJUNCTIONS];
