@@ -16,10 +16,12 @@ export interface GrammarPage {
   route: string
   title: string
   Content: ComponentType<GrammarProps>
+  // A wider page on desktop (e.g. for wide tables)
+  wide?: boolean
 }
 
 export const DECLENSION_TABLES: GrammarPage = {
-  route: 'grammar/declension-tables', title: 'Declension tables', Content: DeclensionTables,
+  route: 'grammar/declension-tables', title: 'Declension tables', Content: DeclensionTables, wide: true,
 };
 
 export const CONJUNCTIONS: GrammarPage = {

@@ -5,8 +5,8 @@ import { choiceValue, multiValue } from '../gapfill/settings.ts'
 import type { Explanation, Gap, GapFillExercise, GapFillTask, ScoreGroup, SettingDef, SettingValues } from '../gapfill/types.ts'
 import { capitalize, hintFor } from '../gapfill/template.ts'
 import {
-  ADJ_ENDING, CASE_SHORT, CASES, caseIndex, DEF_ARTICLE, DEF_OPTIONS, EIN_ENDING, EIN_WORDS_PL, EIN_WORDS_SG, ENDING_OPTIONS, GENDER_LABEL, GENDER_SHORT, GENDERS,
-  type CaseId, type CaseIndex, type Gender,
+  ADJ_ENDING, CASE_SHORT, CASES, caseIndex, DEF_ARTICLE, DEF_OPTIONS, EIN_ENDING, EIN_WORDS_PL, EIN_WORDS_SG, ENDING_OPTIONS, GENDER_LABEL, GENDER_LETTER, GENDERS,
+  type CaseId, type CaseIndex,
 } from '../grammar.ts'
 import { nounForm, type Noun } from '../nouns.ts'
 import { pick } from '../random.ts'
@@ -148,13 +148,10 @@ const PATTERNS: Pattern[] = [
 // the mixed ones, and without an article the strong ones
 const ADJ_TABLE = { def: ADJ_ENDING.weak, ein: ADJ_ENDING.mixed, none: ADJ_ENDING.strong };
 
-// Shown after each noun: ♂ maskulin, ♀ feminin, ⚲ neutrum, ⚤ Plural. U+FE0E asks
-// for the plain text symbol, not the coloured emoji some phones show for ♂ and ♀
-const GENDER_SIGN: Record<Gender, string> = { m: '♂\uFE0E', f: '♀\uFE0E', n: '⚲\uFE0E', p: '⚤\uFE0E' };
-
 // The gaps of one noun phrase, in the pattern's form: (article) (adjective) noun.
 // einWord: which of ein/kein/mein … to use, for the ein-word patterns
-function phraseGaps(noun: SentenceNoun, adj: string, einWord: string, pattern: Pattern, ci: CaseIndex): Gap[] {
+// showGender: the noun's gender letter after it (a setting)
+function phraseGaps(noun: SentenceNoun, adj: string, einWord: string, pattern: Pattern, ci: CaseIndex, showGender: boolean): Gap[] {
   const gaps: Gap[] = [];
   if (pattern.article === 'def') {
     gaps.push({ label: 'Article', options: DEF_OPTIONS, answer: DEF_ARTICLE[noun.g][ci] });
@@ -165,8 +162,8 @@ function phraseGaps(noun: SentenceNoun, adj: string, einWord: string, pattern: P
     const table = ADJ_TABLE[pattern.article];
     gaps.push({ label: 'Adjective', options: ENDING_OPTIONS.map(e => adj + e), answer: adj + table[noun.g][ci] });
   }
-  // The gender is given: the exercise is about the endings, not about guessing it
-  gaps.push({ label: 'Noun', options: noun.opts, answer: nounForm(noun, ci), note: GENDER_SIGN[noun.g] });
+  // The gender can be given: the exercise is about the endings, not about guessing it
+  gaps.push({ label: 'Noun', options: noun.opts, answer: nounForm(noun, ci), note: showGender ? GENDER_LETTER[noun.g] : undefined });
   return gaps;
 }
 
@@ -205,6 +202,7 @@ const SETTINGS: SettingDef[] = [
     options: [{ id: 'ein-kein', label: 'ein, kein' }, { id: 'all', label: 'Also mein, dein …' }],
     default: 'all',
   },
+  { id: 'showGender', label: "Show each noun's gender (M, F, n, Pl)", type: 'boolean', default: true },
 ];
 
 // The settings as the generator uses them
@@ -215,6 +213,7 @@ interface Choice {
   lengths: number[]
   einWordsSg: string[]
   einWordsPl: string[]
+  showGender: boolean
 }
 
 function readChoice(values: SettingValues): Choice {
@@ -228,6 +227,7 @@ function readChoice(values: SettingValues): Choice {
     einWordsSg: all ? EIN_WORDS_SG : ['ein', 'kein'],
     // No plural of "ein"
     einWordsPl: all ? EIN_WORDS_PL : ['kein'],
+    showGender: values.showGender !== false,
   };
 }
 
@@ -302,7 +302,7 @@ function createTask(c: Choice, frames: Frame[]): GapFillTask | null {
     const ci = caseIndex(phrase.case);
     keyParts.push(pattern.id, einWord, adj, noun.w);
 
-    let pg = phraseGaps(noun, adj, einWord, pattern, ci)
+    let pg = phraseGaps(noun, adj, einWord, pattern, ci, c.showGender)
       .map((g): Gap => isAsked[i] ? { ...g, tone: phrase.case } : { ...g, given: true });
     if (i === 0 && frame.text.startsWith('{}')) pg = [capitalized(pg[0]), ...pg.slice(1)];
     const first = gaps.length;
@@ -311,8 +311,8 @@ function createTask(c: Choice, frames: Frame[]): GapFillTask | null {
     phraseHints.push(pg.map(g => `{${g.given ? g.answer : hintFor(g.options)}}`).join(' '));
     if (!isAsked[i]) continue;
     scores.push({ tags: { case: CASE_SHORT[phrase.case], pattern: pattern.id }, gaps: pg.map((_, k) => first + k) });
-    // "Akk m", "Dat pl" … before the phrase, shown after mistakes
-    explanations.push({ gap: first, text: CASE_SHORT[phrase.case], detail: GENDER_SHORT[noun.g] });
+    // "Akk M", "Dat Pl" … before the phrase, shown after mistakes
+    explanations.push({ gap: first, text: CASE_SHORT[phrase.case], detail: GENDER_LETTER[noun.g] });
   }
 
   // Each {} of the frame becomes its phrase's gaps
@@ -325,9 +325,9 @@ function createTask(c: Choice, frames: Frame[]): GapFillTask | null {
 export const declensionSentences: GapFillExercise = {
   id: 'declension-sentences',
   title: 'Declension in sentences',
-  info: `Complete the sentence one word at a time: choose each word's ending from the options below it. After each noun its gender is given: ♂\uFE0E maskulin, ♀\uFE0E feminin, ⚲\uFE0E neutrum, ⚤\uFE0E Plural.
+  info: `Complete the sentence one word at a time: choose each word's ending from the options below it. After each noun its gender is given (unless turned off in the settings): M maskulin, F feminin, n neutrum, Pl Plural.
 
-A wrong choice turns red; try again. After a mistake the sentence stays, with the case and gender of each noun phrase in front of it, e.g. (Dat pl), until you click Next. The settings (gear) choose the cases, forms and more.`,
+A wrong choice turns red; try again. After a mistake the sentence stays, with the case and gender of each noun phrase in front of it, e.g. (Dat Pl), until you click Next. The settings (gear) choose the cases, forms and more.`,
   settings: SETTINGS,
   problem(values) {
     return framesFor(readChoice(values)).length ? null

@@ -8,7 +8,7 @@ export function GrammarPage({ page, onBack }: { page: Page; onBack: () => void }
   const compact = useMediaQuery(COMPACT_QUERY);
   const { Content } = page;
   return (
-    <div className={compact ? 'app compact' : 'app'}>
+    <div className={compact ? 'app compact' : page.wide ? 'app wide' : 'app'}>
       <Header title={page.title} iconSize={compact ? 24 : 22} onBack={onBack} backLabel="Back" />
       <main>
         <section className="card grammar">

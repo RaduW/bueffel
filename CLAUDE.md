@@ -105,13 +105,13 @@ the same page serves many exercises (declension, verbs …).
   `defaultValues`, `multiValue`, `choiceValue`, `emptySelection`. A task is plain data: `template`
   ("{D__} {alt__} {Mann__} sieht …", gaps matched by position), `gaps`
   ({answer, options, label?, note?, given?, tone?}; note is always shown in grey
-  brackets after the gap, e.g. the noun's gender sign ♂ ♀ ⚲ ⚤; given = filled in
+  brackets after the gap, e.g. the noun's gender letter M F n Pl (`GENDER_LETTER`; user's choice, clearer than ♂ ♀ ⚲ ⚤; text size; sentences setting `showGender`); given = filled in
   from the start, italic in `--given`, skipped by the session, not scored; tone =
   'nom'|'akk'|'dat'|'gen' -> the `--case-*` colours of the declension tables,
   shown only once every gap of its score group is filled (`isGroupComplete`;
   before that dark grey `--pending`, so the colour doesn't give the case away)), `scores` ({tags, gaps}: one group per asked noun phrase),
   `explanations?` ({gap, text, detail?}: text "Dat" in the gap's tone, detail
-  "pl" grey (user: colour only the case, not the gender), shown in brackets
+  "Pl" grey (user: colour only the case, not the gender), shown in brackets
   before that gap only after a task finished with mistakes), `prompt?` (data of
   type P for the exercise's Prompt component).
   Definitions know nothing about the UI and don't drive gap-to-gap progress.
@@ -165,7 +165,7 @@ kept, but not used.
   nothing (not even the streak). The streak follows score groups in order.
 - Storage keys are prefixed `bueffel-`: other apps on raduw.github.io share
   the same origin and storage.
-- The declension tables fit the page card (728px) without scrolling ("keinen alten Leuten").
+- The declension tables fit the page card without scrolling ("keinen alten Leuten"); on desktop their page is wider (`wide` grammar page: 880px column instead of 760px).
 
 ## Commands
 

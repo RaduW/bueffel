@@ -96,6 +96,8 @@ main, .app > header {
   margin: 0 auto;
   padding: 0 16px 48px;
 }
+/* Desktop pages with wide content (the declension tables) */
+.app.wide > main, .app.wide > header { max-width: 880px; }
 
 .app > header {
   display: flex;
@@ -364,7 +366,7 @@ h1:has(.logo) { display: flex; align-items: center; gap: 10px; }
 /* Filled in from the start, not asked: plain weight, so it reads as part of the sentence */
 .gap.prefilled { color: var(--given); border-bottom-color: transparent; font-style: italic; }
 .inline-options { flex-direction: row; flex-wrap: wrap; gap: 6px 16px; }
-.gap-note { color: var(--muted); font-size: 0.75em; white-space: nowrap; }
+.gap-note { color: var(--muted); white-space: nowrap; }
 .explanation { color: var(--muted); font-size: 0.6em; font-weight: 600; white-space: nowrap; }
 .card.gapfill .actions { margin-top: 20px; }
 .scores-scroll { overflow-x: auto; }
@@ -419,8 +421,7 @@ h1:has(.logo) { display: flex; align-items: center; gap: 10px; }
 .compact .exercise-name { font-size: 0.75rem; }
 .compact .given { font-size: 1.35rem; gap: 8px; margin-top: 8px; }
 .compact .sentence { font-size: 1.3rem; margin: 0 0 8px; }
-/* Notes are hard to read small on a phone: bigger gender signs and case explanations */
-.compact .gap-note { font-size: 1.1em; }
+/* Explanations are hard to read small on a phone */
 .compact .explanation { font-size: 0.9em; }
 .compact .scores { margin-top: 20px; }
 .compact .scores table { font-size: 0.8rem; }

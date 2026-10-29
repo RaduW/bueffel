@@ -23,6 +23,9 @@ export const GENDER_LABEL: Record<Gender, string> = { m: 'maskulin', n: 'neutrum
 // Short names, used in score tags and explanations: "Dat", "pl"
 export const CASE_SHORT: Record<CaseId, string> = { nom: 'Nom', akk: 'Akk', dat: 'Dat', gen: 'Gen' };
 export const GENDER_SHORT: Record<Gender, string> = { m: 'm', n: 'n', f: 'f', p: 'pl' };
+// Shown with nouns and in explanations: "Haus (n)", "(Dat Pl)"; letters, so the
+// gender is clear at a glance (the score tags keep GENDER_SHORT)
+export const GENDER_LETTER: Record<Gender, string> = { m: 'M', f: 'F', n: 'n', p: 'Pl' };
 export const GENDER_HEADER: Record<Gender, string> = { m: 'Maskulin', n: 'Neutrum', f: 'Feminin', p: 'Plural' };
 export const GENDERS = Object.keys(GENDER_LABEL) as Gender[];
 
